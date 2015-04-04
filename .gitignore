@@ -1,0 +1,6 @@
+*.pyc
+__pycache__/
+*.sw*
+django_allauth_2fa.egg-info/
+db.sqlite3
+.idea/

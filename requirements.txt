@@ -1,0 +1,5 @@
+django>=1.7.0
+qrcode
+django-allauth
+django-otp
+
