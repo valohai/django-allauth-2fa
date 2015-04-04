@@ -15,5 +15,5 @@ setup(
     keywords="otp auth two factor authentication allauth django",
     url="https://github.com/valberg/django-allauth-2fa",
 
-    long_description=open('README.md', 'r').read(),
+    long_description=open('README.rst', 'r').read(),
 )

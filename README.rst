@@ -1,16 +1,18 @@
-# django-allauth-2fa
+django-allauth-2fa
+==================
 
 Adds two factor authentication to django-allauth.
 
 
-## Installation
+Installation
+------------
 
-Install `django-allauth-2fa` with pip:
+Install `django-allauth-2fa` with pip::
 
     pip install django-allauth-2fa
 
 
-Adjust your settings accordingly:
+Adjust your settings accordingly::
 
     INSTALLED_APPS = (
         # ...
