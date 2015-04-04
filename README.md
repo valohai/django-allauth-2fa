@@ -14,6 +14,7 @@ Adjust your settings accordingly:
 
     INSTALLED_APPS = (
         # ...
+        'django.contrib.sites',
         'django_otp',
         'django_otp.plugins.otp_totp',
         'django_otp.plugins.otp_hotp',
@@ -28,7 +29,6 @@ Adjust your settings accordingly:
         'django_otp.middleware.OTPMiddleware',
     )
 
-
     TEMPLATE_CONTEXT_PROCESSORS = (
         # ...
         "allauth.account.context_processors.account",
@@ -37,5 +37,7 @@ Adjust your settings accordingly:
 
     ACCOUNT_ADAPTER = 'allauth_2fa.adapter.OTPAdapter'
 
+    SITE_ID = 1
 
-Remember to migrate!
+
+Remember to migrate and set the domain and display name for your site!
