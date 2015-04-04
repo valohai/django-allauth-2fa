@@ -10,7 +10,7 @@ setup(
 
     author="Víðir Valberg Guðmundsson",
     author_email="valberg@orn.li",
-    description="Add a two-factor ",
+    description="Adds two factor authentication to django-allauth",
     license="PSF",
     keywords="otp auth two factor authentication allauth django",
     url="https://github.com/valberg/django-allauth-2fa",
