@@ -6,6 +6,7 @@ except ImportError:
     from urllib import quote, urlencode
 
 from django.core.urlresolvers import reverse_lazy
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect, HttpResponse
@@ -19,10 +20,16 @@ from qrcode.image.svg import SvgPathImage
 from .forms import TOTPDeviceForm, TOTPAuthenticateForm
 
 
+if hasattr(settings, 'LOGIN_REDIRECT_URL'):
+    SUCCESS_URL = settings.LOGIN_REDIRECT_URL
+else:
+    SUCCESS_URL = reverse_lazy('home')
+
+
 class TwoFactorAuthenticate(FormView):
     template_name = 'allauth_2fa/authenticate.html'
     form_class = TOTPAuthenticateForm
-    success_url = reverse_lazy('profile')
+    success_url = SUCCESS_URL
 
     def get_form_kwargs(self):
         kwargs = super(TwoFactorAuthenticate, self).get_form_kwargs()
