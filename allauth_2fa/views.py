@@ -17,7 +17,7 @@ from django_otp.util import random_hex
 import qrcode
 from qrcode.image.svg import SvgPathImage
 
-from .forms import TOTPDeviceForm, TOTPAuthenticateForm
+from .forms import TOTPDeviceForm, TOTPDeviceRemoveForm, TOTPAuthenticateForm
 
 
 if hasattr(settings, 'LOGIN_REDIRECT_URL'):
@@ -76,6 +76,29 @@ class TwoFactorSetup(FormView):
         return super(TwoFactorSetup, self).form_valid(form)
 
 two_factor_setup = TwoFactorSetup.as_view()
+
+
+class TwoFactorRemove(FormView):
+    template_name = 'allauth_2fa/remove.html'
+    form_class = TOTPDeviceRemoveForm
+    success_url = reverse_lazy('two-factor-setup')
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.totpdevice_set.exists():
+            return super(TwoFactorRemove, self).dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse_lazy('two-factor-setup'))
+
+    def form_valid(self, form):
+        form.save()
+        return super(TwoFactorRemove, self).form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(TwoFactorRemove, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+two_factor_remove = TwoFactorRemove.as_view()
 
 
 class TwoFactorBackupTokens(TemplateView):

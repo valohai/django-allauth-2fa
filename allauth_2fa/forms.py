@@ -75,3 +75,20 @@ class TOTPDeviceForm(forms.Form):
             digits=self.digits,
             name='default'
         )
+
+
+class TOTPDeviceRemoveForm(forms.Form):
+
+    def __init__(self, user, **kwargs):
+        super(TOTPDeviceRemoveForm, self).__init__(**kwargs)
+        self.user = user
+
+    def save(self):
+        # Delete any backup tokens.
+        static_device = self.user.staticdevice_set.get(name='backup')
+        static_device.token_set.all().delete()
+        static_device.delete()
+
+        # Delete TOTP device.
+        device = TOTPDevice.objects.get(user=self.user)
+        device.delete()

@@ -19,6 +19,10 @@ urls =  [
     url(r"^two_factor/qr_code$",
         views.two_factor_qr_code_generator,
         name="two-factor-qr-code"),
+
+    url(r"^two_factor/remove$",
+        views.two_factor_remove,
+        name="two-factor-remove"),
 ]
 
 urlpatterns = patterns('', *urls)
