@@ -39,7 +39,11 @@ class TOTPDeviceForm(forms.Form):
         self.metadata = metadata or {}
 
     def clean_token(self):
-        token = int(self.cleaned_data.get('token'))
+        try:
+            token = int(self.cleaned_data.get('token'))
+        except ValueError:
+            # valid will never equal true in this case.
+            token = None
         valid = False
         t0s = [self.t0]
         key = unhexlify(self.key.encode())
