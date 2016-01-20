@@ -1,9 +1,9 @@
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 
 from . import views
 
 
-urls =  [
+urlpatterns =  [
     url(r"^two-factor-authenticate$",
         views.two_factor_authenticate,
         name="two-factor-authenticate"),
@@ -24,5 +24,3 @@ urls =  [
         views.two_factor_remove,
         name="two-factor-remove"),
 ]
-
-urlpatterns = patterns('', *urls)
