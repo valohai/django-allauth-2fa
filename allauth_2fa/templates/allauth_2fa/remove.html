@@ -3,17 +3,16 @@
 
 {% block content %}
 <h1>
-  {% trans "Two-Factor Authentication" %}
+  {% trans "Disable Two-Factor Authentication" %}
 </h1>
+
+<p>{% trans "Are you sure?" %}</p>
 
 <form method="post">
   {% csrf_token %}
-  {{ form.non_field_errors }}
-  {{ form.otp_token.label }}:
-  {{ form.otp_token }}
-
   <button type="submit">
-    {% trans 'Authenticate' %}
+    {% trans 'Disable Two-Factor' %}
   </button>
 </form>
+
 {% endblock %}

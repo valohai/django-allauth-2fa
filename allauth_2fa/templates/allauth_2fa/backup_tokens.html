@@ -2,18 +2,27 @@
 {% load i18n %}
 
 {% block content %}
-  <h1>{% trans "Two-Factor Authentication Backup Tokens" %}</h1>
+<h1>
+  {% trans "Two-Factor Authentication Backup Tokens" %}
+</h1>
 
-  <ul>
+<ul>
   {% for token in backup_tokens %}
-    <li>{{ token.token }}</li>
-  {% empty %}
-    {% trans 'No tokens. Press the button below to generate some.' %}
-  {% endfor %}
-  </ul>
+  <li>{{ token.token }}</li>
 
-  <form method="post">{% csrf_token %}
-    <button type="submit">{% trans 'Generate backup tokens' %}</button>
-  </form>
+  {% empty %}
+  {% trans 'No tokens. Press the button below to generate some.' %}
+
+  {% endfor %}
+</ul>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">
+    {% trans 'Generate backup tokens' %}
+  </button>
+</form>
+
+<a href="{% url 'two-factor-remove' %}">Disable Two Factor</a>
 
 {% endblock %}

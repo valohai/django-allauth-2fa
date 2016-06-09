@@ -1,33 +1,35 @@
 from base64 import b32encode
 from binascii import unhexlify
-from django.contrib.auth.models import User
-from django_otp.plugins.otp_static.models import StaticToken
-
 try:
     from urllib.parse import quote, urlencode
 except ImportError:
     from urllib import quote, urlencode
 
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.sites.shortcuts import get_current_site
+from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import FormView, View, TemplateView
+from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.util import random_hex
-from django.contrib.sites.models import get_current_site
-from django.http import HttpResponse
-
-from .forms import (
-    TOTPDeviceForm,
-    TOTPAuthenticateForm,
-)
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
+
+from .forms import TOTPDeviceForm, TOTPDeviceRemoveForm, TOTPAuthenticateForm
+
+
+if hasattr(settings, 'LOGIN_REDIRECT_URL'):
+    SUCCESS_URL = settings.LOGIN_REDIRECT_URL
+else:
+    SUCCESS_URL = reverse_lazy('home')
 
 
 class TwoFactorAuthenticate(FormView):
     template_name = 'allauth_2fa/authenticate.html'
     form_class = TOTPAuthenticateForm
-    success_url = reverse_lazy('profile')
+    success_url = SUCCESS_URL
 
     def get_form_kwargs(self):
         kwargs = super(TwoFactorAuthenticate, self).get_form_kwargs()
@@ -49,7 +51,7 @@ two_factor_authenticate = TwoFactorAuthenticate.as_view()
 class TwoFactorSetup(FormView):
     template_name = 'allauth_2fa/setup.html'
     form_class = TOTPDeviceForm
-    success_url = reverse_lazy('profile')
+    success_url = reverse_lazy('two-factor-backup-tokens')
 
     def dispatch(self, request, *args, **kwargs):
 
@@ -60,7 +62,7 @@ class TwoFactorSetup(FormView):
             self.secret_key = request.session['allauth_otp_qr_secret_key']
 
         if request.user.totpdevice_set.exists():
-            return HttpResponseRedirect(reverse_lazy('profile'))
+            return HttpResponseRedirect(reverse_lazy('two-factor-backup-tokens'))
         return super(TwoFactorSetup, self).dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
@@ -74,6 +76,29 @@ class TwoFactorSetup(FormView):
         return super(TwoFactorSetup, self).form_valid(form)
 
 two_factor_setup = TwoFactorSetup.as_view()
+
+
+class TwoFactorRemove(FormView):
+    template_name = 'allauth_2fa/remove.html'
+    form_class = TOTPDeviceRemoveForm
+    success_url = reverse_lazy('two-factor-setup')
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.totpdevice_set.exists():
+            return super(TwoFactorRemove, self).dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse_lazy('two-factor-setup'))
+
+    def form_valid(self, form):
+        form.save()
+        return super(TwoFactorRemove, self).form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(TwoFactorRemove, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+two_factor_remove = TwoFactorRemove.as_view()
 
 
 class TwoFactorBackupTokens(TemplateView):
@@ -95,7 +120,7 @@ class TwoFactorBackupTokens(TemplateView):
             name='backup'
         )
         static_device.token_set.all().delete()
-        for _ in range(10):
+        for _ in range(3):
             static_device.token_set.create(token=StaticToken.random_token())
         return self.get(request, *args, **kwargs)
 
@@ -115,11 +140,11 @@ class QRCodeGeneratorView(View):
                 issuer=get_current_site(request).name,
                 username=request.user.username
             )),
-            query=urlencode({
-                'secret': secret_key,
-                'digits': 6,
-                'issuer': get_current_site(request).name
-            })
+            query=urlencode((
+                ('secret', secret_key),
+                ('digits', 6),
+                ('issuer', get_current_site(request).name),
+            ))
         )
 
         img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
