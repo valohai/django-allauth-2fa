@@ -7,7 +7,7 @@ setup(
     version="0.1.4",
     packages=find_packages(),
     install_requires=[
-        "django>=1.7.0,<1.10",
+        "django>=1.8",
         "qrcode>=5.3",
         "django-allauth>=0.26.1",
         "django-otp>=0.3.5",
