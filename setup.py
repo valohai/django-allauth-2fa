@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from setuptools import setup, find_packages
 
 setup(
@@ -5,10 +7,10 @@ setup(
     version="0.1.4",
     packages=find_packages(),
     install_requires=[
-        "django>=1.7.0",
-        "qrcode==5.1",
-        "django-allauth==0.23.0",
-        "django-otp==0.3.1",
+        "django>=1.8",
+        "qrcode>=5.3",
+        "django-allauth>=0.26.1",
+        "django-otp>=0.3.5",
     ],
     author="Víðir Valberg Guðmundsson",
     author_email="valberg@orn.li",
