@@ -1,8 +1,10 @@
 django-allauth-2fa
 ==================
 
-Adds two factor authentication to django-allauth.
+.. image:: https://travis-ci.org/percipient/django-allauth-2fa.svg?branch=master
+    :target: https://travis-ci.org/percipient/django-allauth-2fa
 
+Adds two factor authentication to django-allauth.
 
 Installation
 ------------
