@@ -15,8 +15,22 @@ setup(
     author="Víðir Valberg Guðmundsson",
     author_email="valberg@orn.li",
     description="Adds two factor authentication to django-allauth",
-    license="PSF",
+    license="ISC",
     keywords="otp auth two factor authentication allauth django",
     url="https://github.com/percipient/django-allauth-2fa",
     long_description=open('README.rst', 'r').read(),
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Environment :: Web Environment',
+        'Topic :: Internet',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Framework :: Django',
+        'License :: OSI Approved :: ISC License (ISCL)',
+    ],
+
 )
