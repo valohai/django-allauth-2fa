@@ -134,16 +134,17 @@ class QRCodeGeneratorView(View):
         content_type = 'image/svg+xml; charset=utf-8'
         raw_key = request.session['allauth_otp_qr_secret_key']
         secret_key = b32encode(unhexlify(raw_key)).decode('utf-8')
+        issuer = get_current_site(request).name
 
         otpauth_url = 'otpauth://totp/{label}?{query}'.format(
             label=quote('{issuer}: {username}'.format(
-                issuer=get_current_site(request).name,
+                issuer=issuer,
                 username=request.user.username
             )),
             query=urlencode((
                 ('secret', secret_key),
                 ('digits', 6),
-                ('issuer', get_current_site(request).name),
+                ('issuer', issuer),
             ))
         )
 
