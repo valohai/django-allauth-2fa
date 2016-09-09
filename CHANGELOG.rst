@@ -3,8 +3,8 @@
 Changelog
 #########
 
-0.2 TBD
-=======
+0.2 September 9, 2016
+=====================
 
 * Add tests / tox / Travis support.
 * Don't pin dependencies.
