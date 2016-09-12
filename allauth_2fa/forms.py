@@ -3,24 +3,19 @@ from time import time
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from django_otp.forms import OTPAuthenticationFormMixin
+from django_otp.forms import OTPTokenForm
 from django_otp.oath import totp
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 
-class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
+class TOTPAuthenticateForm(OTPTokenForm, forms.Form):
     otp_token = forms.CharField(
         label=_("Token"),
     )
 
     def __init__(self, user, **kwargs):
-        super(TOTPAuthenticateForm, self).__init__(**kwargs)
+        super(TOTPAuthenticateForm, self).__init__(user, **kwargs)
         self.fields['otp_token'].widget.attrs.update({'autofocus': 'autofocus'})
-        self.user = user
-
-    def clean(self):
-        self.clean_otp(self.user)
-        return self.cleaned_data
 
 
 class TOTPDeviceForm(forms.Form):
