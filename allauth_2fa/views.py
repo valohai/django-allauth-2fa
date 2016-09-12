@@ -7,7 +7,7 @@ except ImportError:
 
 from django.core.urlresolvers import reverse_lazy
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import FormView, View, TemplateView
@@ -34,7 +34,7 @@ class TwoFactorAuthenticate(FormView):
     def get_form_kwargs(self):
         kwargs = super(TwoFactorAuthenticate, self).get_form_kwargs()
         user_id = self.request.session['user_id']
-        kwargs['user'] = User.objects.get(id=user_id)
+        kwargs['user'] = get_user_model().objects.get(id=user_id)
         return kwargs
 
     def form_valid(self, form):
