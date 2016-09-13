@@ -71,12 +71,6 @@ in-depth steps on their configuration.)
         'django_otp.middleware.OTPMiddleware',
     )
 
-    TEMPLATE_CONTEXT_PROCESSORS = (
-        # Configure allauth.
-        'django.core.context_processors.request',
-        "allauth.account.context_processors.account",
-    )
-
     # Set the allauth adapter to be the 2FA adapter.
     ACCOUNT_ADAPTER = 'allauth_2fa.adapter.OTPAdapter'
 
