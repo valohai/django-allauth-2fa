@@ -69,6 +69,11 @@ in-depth steps on their configuration.)
         # Configure the django-otp package. Note this must be after the
         # AuthenticationMiddleware.
         'django_otp.middleware.OTPMiddleware',
+
+        # If this middleware is enabled the login flow is reset if another page
+        # is loaded than. This makes sure someone does not stay half logged in
+        # without knowing.
+        'allauth_2fa.middleware.AllauthTwoFactorMiddleware',
     )
 
     # Set the allauth adapter to be the 2FA adapter.
