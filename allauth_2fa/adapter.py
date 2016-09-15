@@ -11,7 +11,7 @@ class OTPAdapter(DefaultAccountAdapter):
 
         # Require two-factor authentication if it has been configured.
         if user.totpdevice_set.all():
-            request.session['user_id'] = user.id
+            request.session['allauth_2fa_user_id'] = user.id
             raise ImmediateHttpResponse(
                 response=HttpResponseRedirect(
                     reverse('two-factor-authenticate')

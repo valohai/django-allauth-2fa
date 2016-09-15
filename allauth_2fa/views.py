@@ -33,18 +33,18 @@ class TwoFactorAuthenticate(FormView):
     success_url = SUCCESS_URL
 
     def get(self, request, *args, **kwargs):
-        if 'user_id' not in request.session:
+        if 'allauth_2fa_user_id' not in request.session:
             return redirect('account_login')
         return super(TwoFactorAuthenticate, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        if 'user_id' not in request.session:
+        if 'allauth_2fa_user_id' not in request.session:
             return redirect('account_login')
         return super(TwoFactorAuthenticate, self).post(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super(TwoFactorAuthenticate, self).get_form_kwargs()
-        user_id = self.request.session['user_id']
+        user_id = self.request.session['allauth_2fa_user_id']
         kwargs['user'] = get_user_model().objects.get(id=user_id)
         return kwargs
 

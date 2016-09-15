@@ -7,6 +7,6 @@ class AllauthTwoFactorMiddleware(object):
     def process_request(self, request):
         if resolve(request.path).url_name != 'two-factor-authenticate':
             try:
-                del request.session['user_id']
+                del request.session['allauth_2fa_user_id']
             except KeyError:
                 pass
