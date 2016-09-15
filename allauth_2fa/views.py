@@ -32,15 +32,11 @@ class TwoFactorAuthenticate(FormView):
     form_class = TOTPAuthenticateForm
     success_url = SUCCESS_URL
 
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         if 'allauth_2fa_user_id' not in request.session:
             return redirect('account_login')
-        return super(TwoFactorAuthenticate, self).get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        if 'allauth_2fa_user_id' not in request.session:
-            return redirect('account_login')
-        return super(TwoFactorAuthenticate, self).post(request, *args, **kwargs)
+        return super(TwoFactorAuthenticate, self).dispatch(request, *args,
+                                                           **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super(TwoFactorAuthenticate, self).get_form_kwargs()
