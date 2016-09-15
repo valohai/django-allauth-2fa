@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     # Enable allauth.
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
 
     # Configure the django-otp package.
     'django_otp',
@@ -64,6 +65,9 @@ MIDDLEWARE_CLASSES = (
 
     # Configure the django-otp package.
     'django_otp.middleware.OTPMiddleware',
+
+    # Reset login flow middleware
+    'allauth_2fa.middleware.AllauthTwoFactorMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (

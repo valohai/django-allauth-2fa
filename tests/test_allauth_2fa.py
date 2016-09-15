@@ -60,3 +60,27 @@ class Test2Factor(TestCase):
         resp = self.client.post(reverse('two-factor-authenticate'),
                                 {'otp_token': 'invalid'})
         self.assertEqual(resp.status_code, 200)
+
+    def test_2fa_reset_flow(self):
+        """Test login flow reset when navigating away."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+        user.totpdevice_set.create()
+
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'})
+        self.assertRedirects(resp,
+                             reverse('two-factor-authenticate'),
+                             fetch_redirect_response=False)
+
+        # Navigate back to login
+        self.client.get(reverse('account_login'))
+
+        # And try to continue with two-factor without logging in again
+        resp = self.client.get(reverse('two-factor-authenticate'))
+
+        self.assertRedirects(resp,
+                             reverse('account_login'),
+                             fetch_redirect_response=False)
