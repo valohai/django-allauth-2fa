@@ -75,8 +75,10 @@ class Test2Factor(TestCase):
                              reverse('two-factor-authenticate'),
                              fetch_redirect_response=False)
 
+        self.assertIn('allauth_2fa_user_id', self.client.session)
         # Navigate back to login
         self.client.get(reverse('account_login'))
+        self.assertNotIn('allauth_2fa_user_id', self.client.session)
 
         # And try to continue with two-factor without logging in again
         resp = self.client.get(reverse('two-factor-authenticate'))
