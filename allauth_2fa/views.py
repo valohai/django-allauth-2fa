@@ -10,14 +10,18 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import redirect
 from django.views.generic import FormView, View, TemplateView
+
 from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.util import random_hex
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
 
-from .forms import TOTPDeviceForm, TOTPDeviceRemoveForm, TOTPAuthenticateForm
+from allauth_2fa.forms import (TOTPDeviceForm,
+                               TOTPDeviceRemoveForm,
+                               TOTPAuthenticateForm)
 
 
 if hasattr(settings, 'LOGIN_REDIRECT_URL'):
@@ -31,9 +35,17 @@ class TwoFactorAuthenticate(FormView):
     form_class = TOTPAuthenticateForm
     success_url = SUCCESS_URL
 
+    def dispatch(self, request, *args, **kwargs):
+        # If the user is not about to enter their two-factor credentials,
+        # redirect to the login page (they shouldn't be here!)
+        if 'allauth_2fa_user_id' not in request.session:
+            return redirect('account_login')
+        return super(TwoFactorAuthenticate, self).dispatch(request, *args,
+                                                           **kwargs)
+
     def get_form_kwargs(self):
         kwargs = super(TwoFactorAuthenticate, self).get_form_kwargs()
-        user_id = self.request.session['user_id']
+        user_id = self.request.session['allauth_2fa_user_id']
         kwargs['user'] = get_user_model().objects.get(id=user_id)
         return kwargs
 
