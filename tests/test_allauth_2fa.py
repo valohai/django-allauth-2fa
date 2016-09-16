@@ -61,8 +61,36 @@ class Test2Factor(TestCase):
                                 {'otp_token': 'invalid'})
         self.assertEqual(resp.status_code, 200)
 
+    def test_2fa_redirect(self):
+        """
+        Going to the 2FA login page when not logged in (or when fully logged in)
+        should redirect.
+        """
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+
+        # Not logged in.
+        resp = self.client.get(reverse('two-factor-authenticate'))
+        self.assertRedirects(resp,
+                             reverse('account_login'),
+                             fetch_redirect_response=False)
+
+        # Logged in.
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'})
+
+        resp = self.client.get(reverse('two-factor-authenticate'))
+        self.assertRedirects(resp,
+                             reverse('account_login'),
+                             fetch_redirect_response=False)
+
     def test_2fa_reset_flow(self):
-        """Test login flow reset when navigating away."""
+        """
+        Ensure the login flow is reset when navigating away before entering
+        two-factor credentials.
+        """
         user = get_user_model().objects.create(username='john')
         user.set_password('doe')
         user.save()
@@ -75,12 +103,17 @@ class Test2Factor(TestCase):
                              reverse('two-factor-authenticate'),
                              fetch_redirect_response=False)
 
+        # The user ID should be in the session.
         self.assertIn('allauth_2fa_user_id', self.client.session)
-        # Navigate back to login
+
+        # Navigate to a different page.
         self.client.get(reverse('account_login'))
+
+        # The middleware should reset the login flow.
         self.assertNotIn('allauth_2fa_user_id', self.client.session)
 
-        # And try to continue with two-factor without logging in again
+        # Trying to continue with two-factor without logging in again will
+        # redirect to login.
         resp = self.client.get(reverse('two-factor-authenticate'))
 
         self.assertRedirects(resp,

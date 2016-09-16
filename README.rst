@@ -70,9 +70,9 @@ in-depth steps on their configuration.)
         # AuthenticationMiddleware.
         'django_otp.middleware.OTPMiddleware',
 
-        # If this middleware is enabled the login flow is reset if another page
-        # is loaded than. This makes sure someone does not stay half logged in
-        # without knowing.
+        # Reset login flow middleware. If this middleware is included, the login
+        # flow is reset if another page is loaded between login and successfully
+        # entering two-factor credentials.
         'allauth_2fa.middleware.AllauthTwoFactorMiddleware',
     )
 
