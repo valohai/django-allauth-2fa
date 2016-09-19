@@ -15,7 +15,10 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
 
     def __init__(self, user, **kwargs):
         super(TOTPAuthenticateForm, self).__init__(**kwargs)
-        self.fields['otp_token'].widget.attrs.update({'autofocus': 'autofocus'})
+        self.fields['otp_token'].widget.attrs.update({
+            'autofocus': 'autofocus',
+            'autocomplete': 'off',
+        })
         self.user = user
 
     def clean(self):
