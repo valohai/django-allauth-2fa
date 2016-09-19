@@ -10,6 +10,7 @@ Changelog
 * Fixed a bug where a user could end up half logged in if they didn't complete
   the two-factor login flow. A user's login flow will now be reset. Requires
   enabled the included middle: ``allauth_2fa.middleware.AllauthTwoFactorMiddleware``.
+* Disable autocomplete on the two-factor code input form.
 * Minor simplifications of code.
 * Minor updates to documentation.
 
