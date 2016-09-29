@@ -14,7 +14,7 @@ from django.shortcuts import redirect
 from django.views.generic import FormView, View, TemplateView
 
 from django_otp.plugins.otp_static.models import StaticToken
-from django_otp.util import random_hex
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
@@ -66,20 +66,16 @@ class TwoFactorSetup(FormView):
     success_url = reverse_lazy('two-factor-backup-tokens')
 
     def dispatch(self, request, *args, **kwargs):
-
-        if 'allauth_otp_qr_secret_key' not in request.session:
-            self.secret_key = random_hex(20).decode('ascii')
-            request.session['allauth_otp_qr_secret_key'] = self.secret_key
-        else:
-            self.secret_key = request.session['allauth_otp_qr_secret_key']
-
-        if request.user.totpdevice_set.exists():
+        if request.user.totpdevice_set.filter(confirmed=True).exists():
             return HttpResponseRedirect(reverse_lazy('two-factor-backup-tokens'))
+
+        request.user.totpdevice_set.filter(confirmed=False).delete()
+        TOTPDevice(user=request.user, confirmed=False).save()
+
         return super(TwoFactorSetup, self).dispatch(request, *args, **kwargs)
 
-    def get_form_kwargs(self):
+    def get_form_kwargs(self, request):
         kwargs = super(TwoFactorSetup, self).get_form_kwargs()
-        kwargs['key'] = self.secret_key
         kwargs['user'] = self.request.user
         return kwargs
 
@@ -144,8 +140,9 @@ class QRCodeGeneratorView(View):
 
     def get(self, request, *args, **kwargs):
         content_type = 'image/svg+xml; charset=utf-8'
-        raw_key = request.session['allauth_otp_qr_secret_key']
-        secret_key = b32encode(unhexlify(raw_key)).decode('utf-8')
+        device = request.user.totpdevice_set\
+            .filter(confirmed=False).first()
+        secret_key = b32encode(device.bin_key).decode('utf-8')
         issuer = get_current_site(request).name
 
         otpauth_url = 'otpauth://totp/{label}?{query}'.format(
