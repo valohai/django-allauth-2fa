@@ -1,7 +1,7 @@
 *.pyc
 __pycache__/
 *.sw*
-db.sqlite3
+db.sqlite
 .idea/
 .tox/
 
