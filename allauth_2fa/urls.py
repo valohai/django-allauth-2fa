@@ -1,26 +1,26 @@
 from django.conf.urls import url
 
-from . import views
+from allauth_2fa import views
 
 
-urlpatterns =  [
+urlpatterns = [
     url(r"^two-factor-authenticate$",
-        views.two_factor_authenticate,
+        views.TwoFactorAuthenticate.as_view(),
         name="two-factor-authenticate"),
 
     url(r"^two_factor/setup$",
-        views.two_factor_setup,
+        views.TwoFactorSetup.as_view(),
         name="two-factor-setup"),
 
     url(r"^two_factor/backup_tokens$",
-        views.two_factor_backup_tokens,
+        views.TwoFactorBackupTokens.as_view(),
         name="two-factor-backup-tokens"),
 
     url(r"^two_factor/qr_code$",
-        views.two_factor_qr_code_generator,
+        views.QRCodeGeneratorView.as_view(),
         name="two-factor-qr-code"),
 
     url(r"^two_factor/remove$",
-        views.two_factor_remove,
+        views.TwoFactorRemove.as_view(),
         name="two-factor-remove"),
 ]

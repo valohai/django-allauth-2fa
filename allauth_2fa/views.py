@@ -1,12 +1,11 @@
 from base64 import b32encode
-from binascii import unhexlify
 try:
     from urllib.parse import quote, urlencode
 except ImportError:
     from urllib import quote, urlencode
 
 from django.conf import settings
-from django.contrib.auth import get_user_model, login, REDIRECT_FIELD_NAME
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse_lazy
@@ -56,8 +55,6 @@ class TwoFactorAuthenticate(FormView):
         login(self.request, form.user)
         return super(TwoFactorAuthenticate, self).form_valid(form)
 
-two_factor_authenticate = TwoFactorAuthenticate.as_view()
-
 
 class TwoFactorSetup(FormView):
     template_name = 'allauth_2fa/setup.html'
@@ -106,8 +103,6 @@ class TwoFactorSetup(FormView):
         self._new_device()
         return super(TwoFactorSetup, self).form_invalid(form)
 
-two_factor_setup = TwoFactorSetup.as_view()
-
 
 class TwoFactorRemove(FormView):
     template_name = 'allauth_2fa/remove.html'
@@ -128,8 +123,6 @@ class TwoFactorRemove(FormView):
         kwargs = super(TwoFactorRemove, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
-
-two_factor_remove = TwoFactorRemove.as_view()
 
 
 class TwoFactorBackupTokens(TemplateView):
@@ -154,8 +147,6 @@ class TwoFactorBackupTokens(TemplateView):
         for _ in range(3):
             static_device.token_set.create(token=StaticToken.random_token())
         return self.get(request, *args, **kwargs)
-
-two_factor_backup_tokens = TwoFactorBackupTokens.as_view()
 
 
 class QRCodeGeneratorView(View):
@@ -185,5 +176,3 @@ class QRCodeGeneratorView(View):
         response = HttpResponse(content_type=content_type)
         img.save(response)
         return response
-
-two_factor_qr_code_generator = QRCodeGeneratorView.as_view()
