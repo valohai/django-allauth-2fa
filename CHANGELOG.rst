@@ -11,7 +11,8 @@ Changelog
   the two-factor login flow. A user's login flow will now be reset. Requires
   enabled the included middle: ``allauth_2fa.middleware.AllauthTwoFactorMiddleware``.
 * Disable autocomplete on the two-factor code input form.
-* Minor simplifications of code.
+* Properly redirect anonymous users.
+* Minor simplifications of code (and inherit more code from django-otp).
 * Minor updates to documentation.
 
 0.2 September 9, 2016
