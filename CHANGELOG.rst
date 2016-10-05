@@ -3,6 +3,11 @@
 Changelog
 #########
 
+0.3.1 October 5, 2016
+=====================
+
+* Properly handle an ``AnonymousUser`` hitting the views.
+
 0.3 October 5, 2016
 ===================
 

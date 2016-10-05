@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 
@@ -119,3 +120,28 @@ class Test2Factor(TestCase):
         self.assertRedirects(resp,
                              reverse('account_login'),
                              fetch_redirect_response=False)
+
+    def test_anonymous(self):
+        """
+        Views should not be hittable via an AnonymousUser.
+        """
+        user = AnonymousUser()
+
+        # The authentication page redirects to the login page.
+        url = reverse('two-factor-authenticate')
+        resp = self.client.get(url)
+        self.assertRedirects(resp,
+                             reverse('account_login'),
+                             fetch_redirect_response=False)
+
+        # Some pages redirect to the login page and then will redirect back.
+        for url in ['two-factor-setup', 'two-factor-backup-tokens', 'two-factor-remove']:
+            url = reverse(url)
+            resp = self.client.get(url)
+            self.assertRedirects(resp,
+                                 reverse('account_login') + '?next=' + url,
+                                 fetch_redirect_response=False)
+
+        # Finally, the QR image view just 404s.
+        resp = self.client.get(reverse('two-factor-qr-code'))
+        self.assertEqual(resp.status_code, 404)
