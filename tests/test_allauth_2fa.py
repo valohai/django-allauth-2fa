@@ -56,7 +56,7 @@ class Test2Factor(TestCase):
                              reverse('two-factor-authenticate'),
                              fetch_redirect_response=False)
 
-        # Now ensure that logging in actually works.
+        # Ensure that logging in does not work with invalid token
         resp = self.client.post(reverse('two-factor-authenticate'),
                                 {'otp_token': 'invalid'})
         self.assertEqual(resp.status_code, 200)

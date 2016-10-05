@@ -5,16 +5,16 @@ try:
 except ImportError:
     from urllib import quote, urlencode
 
-from django.core.urlresolvers import reverse_lazy
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import FormView, View, TemplateView
 
 from django_otp.plugins.otp_static.models import StaticToken
-from django_otp.util import random_hex
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
@@ -50,10 +50,8 @@ class TwoFactorAuthenticate(FormView):
         return kwargs
 
     def form_valid(self, form):
-        from django.contrib.auth import login
         if not hasattr(form.user, 'backend'):
-            form.user.backend \
-                = "allauth.account.auth_backends.AuthenticationBackend"
+            form.user.backend = "allauth.account.auth_backends.AuthenticationBackend"
         login(self.request, form.user)
         return super(TwoFactorAuthenticate, self).form_valid(form)
 
@@ -66,26 +64,42 @@ class TwoFactorSetup(FormView):
     success_url = reverse_lazy('two-factor-backup-tokens')
 
     def dispatch(self, request, *args, **kwargs):
-
-        if 'allauth_otp_qr_secret_key' not in request.session:
-            self.secret_key = random_hex(20).decode('ascii')
-            request.session['allauth_otp_qr_secret_key'] = self.secret_key
-        else:
-            self.secret_key = request.session['allauth_otp_qr_secret_key']
-
-        if request.user.totpdevice_set.exists():
+        # If the user has 2FA setup already, redirect them to the backup tokens.
+        if request.user.totpdevice_set.filter(confirmed=True).exists():
             return HttpResponseRedirect(reverse_lazy('two-factor-backup-tokens'))
+
         return super(TwoFactorSetup, self).dispatch(request, *args, **kwargs)
+
+    def _new_device(self):
+        """
+        Replace any unconfirmed TOTPDevices with a new one for confirmation.
+
+        This needs to be done whenever a GET request to the page is received OR
+        if the confirmation of the device fails.
+        """
+        self.request.user.totpdevice_set.filter(confirmed=False).delete()
+        TOTPDevice.objects.create(user=self.request.user, confirmed=False)
+
+    def get(self, request, *args, **kwargs):
+        # Whenever this page is loaded, create a new device (this ensures a
+        # user's QR code isn't shown multiple times).
+        self._new_device()
+        return super(TwoFactorSetup, self).get(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super(TwoFactorSetup, self).get_form_kwargs()
-        kwargs['key'] = self.secret_key
         kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
+        # Confirm the device.
         form.save()
         return super(TwoFactorSetup, self).form_valid(form)
+
+    def form_invalid(self, form):
+        # If the confirmation code was wrong, generate a new device.
+        self._new_device()
+        return super(TwoFactorSetup, self).form_invalid(form)
 
 two_factor_setup = TwoFactorSetup.as_view()
 
@@ -140,12 +154,14 @@ two_factor_backup_tokens = TwoFactorBackupTokens.as_view()
 
 
 class QRCodeGeneratorView(View):
+    """Renders a QR code as an SVG for a particular user's device."""
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
         content_type = 'image/svg+xml; charset=utf-8'
-        raw_key = request.session['allauth_otp_qr_secret_key']
-        secret_key = b32encode(unhexlify(raw_key)).decode('utf-8')
+        device = request.user.totpdevice_set.filter(confirmed=False).first()
+        print(device.id)
+        secret_key = b32encode(device.bin_key).decode('utf-8')
         issuer = get_current_site(request).name
 
         otpauth_url = 'otpauth://totp/{label}?{query}'.format(
@@ -155,7 +171,7 @@ class QRCodeGeneratorView(View):
             )),
             query=urlencode((
                 ('secret', secret_key),
-                ('digits', 6),
+                ('digits', device.get_digits_display()),
                 ('issuer', issuer),
             ))
         )
