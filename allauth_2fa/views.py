@@ -66,13 +66,27 @@ class TwoFactorSetup(FormView):
     success_url = reverse_lazy('two-factor-backup-tokens')
 
     def dispatch(self, request, *args, **kwargs):
+        # If the user has 2FA setup already, redirect them to the backup tokens.
         if request.user.totpdevice_set.filter(confirmed=True).exists():
             return HttpResponseRedirect(reverse_lazy('two-factor-backup-tokens'))
 
-        request.user.totpdevice_set.filter(confirmed=False).delete()
-        TOTPDevice(user=request.user, confirmed=False).save()
-
         return super(TwoFactorSetup, self).dispatch(request, *args, **kwargs)
+
+    def _new_device(self):
+        """
+        Replace any unconfirmed TOTPDevices with a new one for confirmation.
+
+        This needs to be done whenever a GET request to the page is received OR
+        if the confirmation of the device fails.
+        """
+        self.request.user.totpdevice_set.filter(confirmed=False).delete()
+        TOTPDevice.objects.create(user=self.request.user, confirmed=False)
+
+    def get(self, request, *args, **kwargs):
+        # Whenever this page is loaded, create a new device (this ensures a
+        # user's QR code isn't shown multiple times).
+        self._new_device()
+        return super(TwoFactorSetup, self).get(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super(TwoFactorSetup, self).get_form_kwargs()
@@ -80,8 +94,14 @@ class TwoFactorSetup(FormView):
         return kwargs
 
     def form_valid(self, form):
+        # Confirm the device.
         form.save()
         return super(TwoFactorSetup, self).form_valid(form)
+
+    def form_invalid(self, form):
+        # If the confirmation code was wrong, generate a new device.
+        self._new_device()
+        return super(TwoFactorSetup, self).form_invalid(form)
 
 two_factor_setup = TwoFactorSetup.as_view()
 
@@ -136,12 +156,13 @@ two_factor_backup_tokens = TwoFactorBackupTokens.as_view()
 
 
 class QRCodeGeneratorView(View):
+    """Renders a QR code as an SVG for a particular user's device."""
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
         content_type = 'image/svg+xml; charset=utf-8'
-        device = request.user.totpdevice_set\
-            .filter(confirmed=False).first()
+        device = request.user.totpdevice_set.filter(confirmed=False).first()
+        print(device.id)
         secret_key = b32encode(device.bin_key).decode('utf-8')
         issuer = get_current_site(request).name
 
@@ -152,7 +173,7 @@ class QRCodeGeneratorView(View):
             )),
             query=urlencode((
                 ('secret', secret_key),
-                ('digits', 6),
+                ('digits', device.get_digits_display()),
                 ('issuer', issuer),
             ))
         )

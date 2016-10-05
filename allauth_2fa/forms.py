@@ -35,16 +35,22 @@ class TOTPDeviceForm(forms.Form):
 
     def clean_token(self):
         token = self.cleaned_data.get('token')
-        self.device = self.user.totpdevice_set\
-            .filter(confirmed=False).first()
 
+        # Find the unconfirmed device and attempt to verify the token.
+        self.device = self.user.totpdevice_set.filter(confirmed=False).first()
         if not self.device.verify_token(token):
             raise forms.ValidationError(_('The entered token is not valid'))
+
         return token
 
     def save(self):
+        # The device was found to be valid, delete other confirmed devices and
+        # confirm the new device.
         self.user.totpdevice_set.filter(confirmed=True).delete()
-        return TOTPDevice.objects.create(user=self.user)
+        self.device.confirmed = True
+        self.device.save()
+
+        return self.device
 
 
 class TOTPDeviceRemoveForm(forms.Form):
