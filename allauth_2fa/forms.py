@@ -1,5 +1,6 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
