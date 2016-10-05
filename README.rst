@@ -120,6 +120,15 @@ django-allauth-2fa useful!
 #. Send a pull request and bug the maintainer until it gets merged and
    published.
 
+The test project can be used as a minimal example using the following:
+
+.. code-block:: bash
+
+    # Run the server with debug.
+    DJANGO_SETTINGS_MODULE=tests.run_settings python manage.py runserver_plus
+    # Run the shell.
+    DJANGO_SETTINGS_MODULE=tests.run_settings python manage.py shell_plus
+
 .. _Víðir Valberg Guðmundsson (@valberg): https://github.com/valberg
 .. _Percipient Networks: https://www.strongarm.io
 .. _the repository: http://github.com/percipient/django-allauth-2fa
