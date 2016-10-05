@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="django-allauth-2fa",
-    version="0.3",
+    version="0.3.1",
     packages=find_packages(),
     install_requires=[
         "django>=1.8",
@@ -15,7 +15,7 @@ setup(
     author="Víðir Valberg Guðmundsson",
     author_email="valberg@orn.li",
     description="Adds two factor authentication to django-allauth",
-    license="ISC",
+    license="Apache 2.0",
     keywords="otp auth two factor authentication allauth django",
     url="https://github.com/percipient/django-allauth-2fa",
     long_description=open('README.rst', 'r').read(),
@@ -30,7 +30,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Framework :: Django',
-        'License :: OSI Approved :: ISC License (ISCL)',
+        'License :: OSI Approved :: Apache Software License',
     ],
-
 )
