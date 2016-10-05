@@ -6,7 +6,8 @@ except ImportError:
     from urllib import quote, urlencode
 
 from django.conf import settings
-from django.contrib.auth import get_user_model, login
+from django.contrib.auth import get_user_model, login, REDIRECT_FIELD_NAME
+from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
@@ -64,6 +65,10 @@ class TwoFactorSetup(FormView):
     success_url = reverse_lazy('two-factor-backup-tokens')
 
     def dispatch(self, request, *args, **kwargs):
+        # TODO Can we use LoginRequiredMixin for this?
+        if request.user.is_anonymous():
+            return redirect_to_login(self.request.get_full_path())
+
         # If the user has 2FA setup already, redirect them to the backup tokens.
         if request.user.totpdevice_set.filter(confirmed=True).exists():
             return HttpResponseRedirect(reverse_lazy('two-factor-backup-tokens'))
