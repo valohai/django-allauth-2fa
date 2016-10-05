@@ -74,7 +74,7 @@ class TwoFactorSetup(FormView):
 
         return super(TwoFactorSetup, self).dispatch(request, *args, **kwargs)
 
-    def get_form_kwargs(self, request):
+    def get_form_kwargs(self):
         kwargs = super(TwoFactorSetup, self).get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
