@@ -10,6 +10,7 @@ DATABASES = {
 }
 
 ROOT_URLCONF = 'tests.urls'
+LOGIN_REDIRECT_URL = '/accounts/password/change/'
 
 TEMPLATES = [
     {
