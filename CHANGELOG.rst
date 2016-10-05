@@ -3,8 +3,8 @@
 Changelog
 #########
 
-0.2.1 xxx
-=========
+0.3 October 5, 2016
+===================
 
 * Support custom ``User`` models.
 * Fixed a bug where a user could end up half logged in if they didn't complete
