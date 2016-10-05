@@ -5,10 +5,10 @@ try:
 except ImportError:
     from urllib import quote, urlencode
 
-from django.core.urlresolvers import reverse_lazy
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import redirect
 from django.views.generic import FormView, View, TemplateView
@@ -50,10 +50,8 @@ class TwoFactorAuthenticate(FormView):
         return kwargs
 
     def form_valid(self, form):
-        from django.contrib.auth import login
         if not hasattr(form.user, 'backend'):
-            form.user.backend \
-                = "allauth.account.auth_backends.AuthenticationBackend"
+            form.user.backend = "allauth.account.auth_backends.AuthenticationBackend"
         login(self.request, form.user)
         return super(TwoFactorAuthenticate, self).form_valid(form)
 
