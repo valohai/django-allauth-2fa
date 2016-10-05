@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import redirect
 from django.views.generic import FormView, View, TemplateView
 
@@ -37,8 +37,11 @@ class TwoFactorAuthenticate(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         # If the user is not about to enter their two-factor credentials,
-        # redirect to the login page (they shouldn't be here!)
+        # redirect to the login page (they shouldn't be here!). This includes
+        # anonymous users.
         if 'allauth_2fa_user_id' not in request.session:
+            # Don't use the redirect_to_login here since we don't actually want
+            # to include the next parameter.
             return redirect('account_login')
         return super(TwoFactorAuthenticate, self).dispatch(request, *args,
                                                            **kwargs)
@@ -62,7 +65,8 @@ class TwoFactorSetup(FormView):
     success_url = reverse_lazy('two-factor-backup-tokens')
 
     def dispatch(self, request, *args, **kwargs):
-        # TODO Can we use LoginRequiredMixin for this?
+        # TODO Once Django 1.9 is the minimum supported version, see if we can
+        # use LoginRequiredMixin.
         if request.user.is_anonymous():
             return redirect_to_login(self.request.get_full_path())
 
@@ -110,6 +114,11 @@ class TwoFactorRemove(FormView):
     success_url = reverse_lazy('two-factor-setup')
 
     def dispatch(self, request, *args, **kwargs):
+        # TODO Once Django 1.9 is the minimum supported version, see if we can
+        # use LoginRequiredMixin.
+        if request.user.is_anonymous():
+            return redirect_to_login(self.request.get_full_path())
+
         if request.user.totpdevice_set.exists():
             return super(TwoFactorRemove, self).dispatch(request, *args, **kwargs)
         else:
@@ -127,6 +136,14 @@ class TwoFactorRemove(FormView):
 
 class TwoFactorBackupTokens(TemplateView):
     template_name = 'allauth_2fa/backup_tokens.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        # TODO Once Django 1.9 is the minimum supported version, see if we can
+        # use LoginRequiredMixin.
+        if request.user.is_anonymous():
+            return redirect_to_login(self.request.get_full_path())
+
+        return super(TwoFactorRemove, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorBackupTokens, self).get_context_data(*kwargs)
@@ -154,6 +171,9 @@ class QRCodeGeneratorView(View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
+        if request.user.is_anonymous():
+            raise Http404()
+
         content_type = 'image/svg+xml; charset=utf-8'
         device = request.user.totpdevice_set.filter(confirmed=False).first()
         print(device.id)
