@@ -4,8 +4,8 @@ try:
 except ImportError:
     from urllib import quote, urlencode
 
-from django.conf import settings
-from django.contrib.auth import get_user_model, login
+from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.urlresolvers import reverse_lazy
@@ -19,21 +19,19 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 import qrcode
 from qrcode.image.svg import SvgPathImage
 
+from allauth.account import signals
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import get_login_redirect_url
+
+from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import (TOTPDeviceForm,
                                TOTPDeviceRemoveForm,
                                TOTPAuthenticateForm)
 
 
-if hasattr(settings, 'LOGIN_REDIRECT_URL'):
-    SUCCESS_URL = settings.LOGIN_REDIRECT_URL
-else:
-    SUCCESS_URL = reverse_lazy('home')
-
-
 class TwoFactorAuthenticate(FormView):
     template_name = 'allauth_2fa/authenticate.html'
     form_class = TOTPAuthenticateForm
-    success_url = SUCCESS_URL
 
     def dispatch(self, request, *args, **kwargs):
         # If the user is not about to enter their two-factor credentials,
@@ -53,10 +51,28 @@ class TwoFactorAuthenticate(FormView):
         return kwargs
 
     def form_valid(self, form):
-        if not hasattr(form.user, 'backend'):
-            form.user.backend = "allauth.account.auth_backends.AuthenticationBackend"
-        login(self.request, form.user)
-        return super(TwoFactorAuthenticate, self).form_valid(form)
+        adapter = get_adapter(self.request)
+
+        # Continue original allauth login flow
+        super(OTPAdapter, adapter).login(self.request, form.user)
+
+        # Copied from allauth.account.utils.perform_login, since this flow was
+        # interupted before.
+        response = HttpResponseRedirect(
+            get_login_redirect_url(self.request))
+
+        signals.user_logged_in.send(sender=form.user.__class__,
+                                    request=self.request,
+                                    response=response,
+                                    user=form.user)
+
+        adapter.add_message(
+            self.request,
+            messages.SUCCESS,
+            'account/messages/logged_in.txt',
+            {'user': form.user})
+
+        return response
 
 
 class TwoFactorSetup(FormView):
