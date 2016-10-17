@@ -192,7 +192,6 @@ class QRCodeGeneratorView(View):
 
         content_type = 'image/svg+xml; charset=utf-8'
         device = request.user.totpdevice_set.filter(confirmed=False).first()
-        print(device.id)
         secret_key = b32encode(device.bin_key).decode('utf-8')
         issuer = get_current_site(request).name
 
