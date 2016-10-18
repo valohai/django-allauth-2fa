@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from django_otp.oath import TOTP
+from allauth.account.signals import user_logged_in
 
 
 class Test2Factor(TestCase):
@@ -14,6 +15,14 @@ class Test2Factor(TestCase):
         user.set_password('doe')
         user.save()
 
+        login_list = []
+
+        def login_callback(sender, **kwargs):
+            login_list.append(sender)
+
+        user_logged_in.connect(login_callback)
+
+
         resp = self.client.post(reverse('account_login'),
                                 {'login': 'john',
                                  'password': 'doe'})
@@ -21,12 +30,21 @@ class Test2Factor(TestCase):
                              settings.LOGIN_REDIRECT_URL,
                              fetch_redirect_response=False)
 
+        self.assertEqual(len(login_list), 1)
+
     def test_2fa_login(self):
         """Test login behavior when 2FA is configured."""
         user = get_user_model().objects.create(username='john')
         user.set_password('doe')
         user.save()
         totp_model = user.totpdevice_set.create()
+
+        login_list = []
+
+        def login_callback(sender, **kwargs):
+            login_list.append(sender)
+
+        user_logged_in.connect(login_callback)
 
         resp = self.client.post(reverse('account_login'),
                                 {'login': 'john',
@@ -42,6 +60,8 @@ class Test2Factor(TestCase):
         self.assertRedirects(resp,
                              settings.LOGIN_REDIRECT_URL,
                              fetch_redirect_response=False)
+
+        self.assertEqual(len(login_list), 1)
 
     def test_invalid_2fa_login(self):
         """Test login behavior when 2FA is configured and wrong code is given."""
