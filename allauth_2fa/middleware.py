@@ -1,5 +1,8 @@
 from django.core.urlresolvers import resolve
-from django.utils.deprecation import MiddlewareMixin
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    MiddlewareMixin = object
 
 
 class AllauthTwoFactorMiddleware(MiddlewareMixin):
