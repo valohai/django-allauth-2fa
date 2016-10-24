@@ -1,7 +1,8 @@
 from django.core.urlresolvers import resolve
+from django.utils.deprecation import MiddlewareMixin
 
 
-class AllauthTwoFactorMiddleware(object):
+class AllauthTwoFactorMiddleware(MiddlewareMixin):
     """
     Reset the login flow if another page is loaded halfway through the login.
     (I.e. if the user has logged in with a username/password, but not yet
