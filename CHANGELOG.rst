@@ -3,6 +3,13 @@
 Changelog
 #########
 
+0.4 xxx xx, 2016
+================
+
+* Properly continue the allauth login workflow after successful 2FA login, e.g.
+  send allauth signals
+* Support using ``MIDDLEWARE`` setting with Django 1.10.
+
 0.3.1 October 5, 2016
 =====================
 
