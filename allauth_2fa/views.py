@@ -51,16 +51,26 @@ class TwoFactorAuthenticate(FormView):
         return kwargs
 
     def form_valid(self, form):
+        """
+        The allauth 2fa login flow is now done (the user logged in successfully
+        with 2FA), continue the logic from allauth.account.utils.perform_login
+        since it was interrupted earlier.
+
+        """
         adapter = get_adapter(self.request)
 
-        # Continue original allauth login flow
+        # Skip over the (already done) 2fa login flow and continue the original
+        # allauth login flow.
         super(OTPAdapter, adapter).login(self.request, form.user)
 
-        # Copied from allauth.account.utils.perform_login, since this flow was
-        # interupted before.
+        # Perform the rest of allauth.account.utils.perform_login, this is
+        # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
+
+        # TODO Support redirect_url.
         response = HttpResponseRedirect(
             get_login_redirect_url(self.request))
 
+        # TODO Support signal_kwargs.
         signals.user_logged_in.send(sender=form.user.__class__,
                                     request=self.request,
                                     response=response,
