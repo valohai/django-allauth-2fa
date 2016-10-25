@@ -28,8 +28,6 @@ TEMPLATES = [
     },
 ]
 
-MIDDLEWARE_CLASSES = tuple()
-
 EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 
 INSTALLED_APPS = (
