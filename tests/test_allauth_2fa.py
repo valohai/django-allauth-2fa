@@ -1,8 +1,15 @@
+from copy import deepcopy
+import unittest
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import override_settings, TestCase
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    MiddlewareMixin = None
 
 from django_otp.oath import TOTP
 from allauth.account.signals import user_logged_in
@@ -165,3 +172,9 @@ class Test2Factor(TestCase):
         # Finally, the QR image view just 404s.
         resp = self.client.get(reverse('two-factor-qr-code'))
         self.assertEqual(resp.status_code, 404)
+
+
+@unittest.skipIf(not MiddlewareMixin, 'Additional middleware tests are Django > 1.10.')
+@override_settings(MIDDLEWARE=settings.MIDDLEWARE_CLASSES, MIDDLEWARE_CLASSES=[])
+class Test2FactorMiddleware(deepcopy(Test2Factor)):
+    """Test the 2FA code when using MIDDLEWARE instead of MIDDLEWARE_CLASSES."""
