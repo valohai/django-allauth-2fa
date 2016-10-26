@@ -10,6 +10,12 @@ Changelog
   send allauth signals
 * Support using ``MIDDLEWARE`` setting with Django 1.10.
 
+0.3.2 October 26, 2016
+======================
+
+* Fix an error when hitting the TwoFactorBackupTokens view as a non-anonymous
+  user.
+
 0.3.1 October 5, 2016
 =====================
 

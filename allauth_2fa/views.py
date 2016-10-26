@@ -169,7 +169,7 @@ class TwoFactorBackupTokens(TemplateView):
         if request.user.is_anonymous():
             return redirect_to_login(self.request.get_full_path())
 
-        return super(TwoFactorRemove, self).dispatch(request, *args, **kwargs)
+        return super(TwoFactorBackupTokens, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorBackupTokens, self).get_context_data(*kwargs)
