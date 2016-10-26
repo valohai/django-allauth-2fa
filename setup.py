@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="django-allauth-2fa",
-    version="0.3.1",
+    version="0.3.2",
     packages=find_packages(),
     install_requires=[
         "django>=1.8",
