@@ -168,6 +168,10 @@ class Test2Factor(TestCase):
         resp = self.client.get(reverse('two-factor-qr-code'))
         self.assertEqual(resp.status_code, 404)
 
+    def test_unnamed_view(self):
+        """Views without names should not throw an exception."""
+        resp = self.client.get('/unnamed-view')
+
 
 @unittest.skipIf(not MiddlewareMixin, 'Additional middleware tests are Django > 1.10.')
 @override_settings(MIDDLEWARE=settings.MIDDLEWARE_CLASSES, MIDDLEWARE_CLASSES=[])
