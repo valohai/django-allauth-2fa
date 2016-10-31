@@ -168,6 +168,37 @@ class Test2Factor(TestCase):
         resp = self.client.get(reverse('two-factor-qr-code'))
         self.assertEqual(resp.status_code, 404)
 
+    def test_unnamed_view(self):
+        """Views without names should not throw an exception."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+        user.totpdevice_set.create()
+
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'})
+        self.assertRedirects(resp,
+                             reverse('two-factor-authenticate'),
+                             fetch_redirect_response=False)
+
+        # The user ID should be in the session.
+        self.assertIn('allauth_2fa_user_id', self.client.session)
+
+        # Navigate to a different (unnamed) page.
+        resp = self.client.get('/unnamed-view')
+
+        # The middleware should reset the login flow.
+        self.assertNotIn('allauth_2fa_user_id', self.client.session)
+
+        # Trying to continue with two-factor without logging in again will
+        # redirect to login.
+        resp = self.client.get(reverse('two-factor-authenticate'))
+
+        self.assertRedirects(resp,
+                             reverse('account_login'),
+                             fetch_redirect_response=False)
+
 
 @unittest.skipIf(not MiddlewareMixin, 'Additional middleware tests are Django > 1.10.')
 @override_settings(MIDDLEWARE=settings.MIDDLEWARE_CLASSES, MIDDLEWARE_CLASSES=[])
