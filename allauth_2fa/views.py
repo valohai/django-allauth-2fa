@@ -208,7 +208,7 @@ class QRCodeGeneratorView(View):
         otpauth_url = 'otpauth://totp/{label}?{query}'.format(
             label=quote('{issuer}: {username}'.format(
                 issuer=issuer,
-                username=request.user.username
+                username=getattr(request.user, request.user.USERNAME_FIELD)
             )),
             query=urlencode((
                 ('secret', secret_key),
