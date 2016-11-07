@@ -3,12 +3,13 @@
 Changelog
 #########
 
-0.4 xxx xx, 2016
-================
+0.4 November 7, 2016
+====================
 
 * Properly continue the allauth login workflow after successful 2FA login, e.g.
   send allauth signals
 * Support using ``MIDDLEWARE`` setting with Django 1.10.
+* Support customer ``USERNAME_FIELD`` on the auth model.
 
 0.3.2 October 26, 2016
 ======================
