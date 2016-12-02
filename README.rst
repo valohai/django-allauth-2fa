@@ -15,7 +15,9 @@ other account management tasks.
 Features
 --------
 
-
+* Adds `two-factor authentication`_ views and workflow to `django-allauth`_.
+* Supports Authenticator apps via a QR code when enabling 2FA.
+* Supports single-use back-up codes.
 
 Installation
 ------------
@@ -100,6 +102,27 @@ Finally, you must include the django-allauth-2fa URLs:
         url(r'^', include('allauth_2fa.urls')),
         url(r'^', include('allauth.urls')),
     ]
+
+.. warning::
+
+    Any login view that is *not* provided by django-allauth will bypass the
+    allauth workflow (including two-factor authentication). The Django admin
+    site includes an additional login view (usually available at
+    ``/admin/login``).
+
+    The easiest way to fix this is to wrap it in ``login_required`` decorator
+    (the code only works if you use the standard admin site, if you have a
+    custom admin site you'll need to customize this more):
+
+    .. code-block:: python
+
+        from django.contrib import admin
+        from django.contrib.auth.decorators import login_required
+
+        # Ensure users go through the allauth workflow when logging into admin.
+        admin.site.login = login_required(admin.site.login)
+        # Run the standard admin set-up.
+        admin.autodiscover()
 
 Contribute
 ----------
