@@ -23,7 +23,6 @@ from allauth.account import signals
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import get_login_redirect_url
 
-from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import (TOTPDeviceForm,
                                TOTPDeviceRemoveForm,
                                TOTPAuthenticateForm)
@@ -61,7 +60,7 @@ class TwoFactorAuthenticate(FormView):
 
         # Skip over the (already done) 2fa login flow and continue the original
         # allauth login flow.
-        super(OTPAdapter, adapter).login(self.request, form.user)
+        super(adapter.__class__, adapter).login(self.request, form.user)
 
         # Perform the rest of allauth.account.utils.perform_login, this is
         # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
