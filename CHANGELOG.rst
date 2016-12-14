@@ -3,6 +3,11 @@
 Changelog
 #########
 
+0.4 December 14, 2016
+=====================
+
+* Fixed a bug when using a custom adapter that overrides the ``login`` method.
+
 0.4 November 7, 2016
 ====================
 
