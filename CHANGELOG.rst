@@ -3,10 +3,17 @@
 Changelog
 #########
 
-0.4 December 14, 2016
-=====================
+0.4.2 December 15, 2016
+=======================
 
-* Fixed a bug when using a custom adapter that overrides the ``login`` method.
+* Reverts the fix in 0.4.1 as this breaks custom adapters that inherit from
+  ``OTPAdapter`` and *don't* override the ``login`` method.
+
+0.4.1 December 14, 2016
+=======================
+
+* Fixed a bug when using a custom adapter that doesn't inherit from
+  ``OTPAdapter`` and that overrides the ``login`` method.
 
 0.4 November 7, 2016
 ====================
