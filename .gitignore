@@ -6,6 +6,7 @@ db.sqlite
 .tox/
 
 # Distributions.
+.eggs/
 build/
 dist/
 django_allauth_2fa.egg-info/
