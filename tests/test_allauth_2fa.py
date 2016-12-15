@@ -11,8 +11,9 @@ try:
 except ImportError:
     MiddlewareMixin = None
 
-from django_otp.oath import TOTP
 from allauth.account.signals import user_logged_in
+
+from django_otp.oath import TOTP
 
 
 class Test2Factor(TestCase):
