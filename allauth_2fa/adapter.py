@@ -18,11 +18,10 @@ class OTPAdapter(DefaultAccountAdapter):
         if user.totpdevice_set.filter(confirmed=True).all():
             request.session['allauth_2fa_user_id'] = user.id
 
-            # Mount redirect url with GET parameters if exists
-            redirect_url = (
-                reverse('two-factor-authenticate') +
-                (u'?{}'.format(urlencode(request.GET)) if request.GET else '')
-            )
+            redirect_url = reverse('two-factor-authenticate')
+            # Add GET parameters to the URL if they exist.
+            if request.GET:
+                redirect_url += u'?' + urlencode(request.GET)
 
             raise ImmediateHttpResponse(
                 response=HttpResponseRedirect(redirect_url)
