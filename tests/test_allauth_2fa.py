@@ -144,6 +144,27 @@ class Test2Factor(TestCase):
                              reverse('account_login'),
                              fetch_redirect_response=False)
 
+    def test_2fa_login_forwarding_get_parameters(self):
+        """
+        Test that the 2FA workflow passes forward the GET parameters sent to the
+        TwoFactorAuthenticate view.
+        """
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+        totp_model = user.totpdevice_set.create()
+
+        # Add a next to unnamed-view.
+        resp = self.client.post(reverse('account_login') + '?next=unnamed-view',
+                                {'login': 'john',
+                                 'password': 'doe'}, follow=True)
+
+        # Ensure that the unnamed-view is still being forwarded to.
+        self.assertRedirects(
+            resp,
+            reverse('two-factor-authenticate') + '?next=unnamed-view',
+            fetch_redirect_response=False)
+
     def test_anonymous(self):
         """
         Views should not be hittable via an AnonymousUser.
