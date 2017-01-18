@@ -3,8 +3,8 @@
 Changelog
 #########
 
-next
-====
+0.4.3 January 18, 2017
+======================
 
 * Adds support for forwarding ``GET`` parameters through the 2FA workflow. This
   fixes ``next`` not working when logging in using 2FA.
