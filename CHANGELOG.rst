@@ -8,6 +8,7 @@ Changelog
 
 * Adds support for forwarding ``GET`` parameters through the 2FA workflow. This
   fixes ``next`` not working when logging in using 2FA.
+* Officially support Python 3.6.
 
 0.4.2 December 15, 2016
 =======================
