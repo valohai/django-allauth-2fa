@@ -3,6 +3,12 @@
 Changelog
 #########
 
+0.4.4 Unreleased
+================
+
+* Adds trailing slashes to the URL patterns. This is backwards compatible with
+  the old URLs.
+
 0.4.3 January 18, 2017
 ======================
 
