@@ -10,7 +10,7 @@ def long_description():
 
 setup(
     name="django-allauth-2fa",
-    version="0.4.3",
+    version="0.4.4",
     packages=find_packages(),
     include_package_data=True,
     install_requires=[

@@ -3,11 +3,12 @@
 Changelog
 #########
 
-0.4.4 Unreleased
-================
+0.4.4 March 24, 2017
+====================
 
 * Adds trailing slashes to the URL patterns. This is backwards compatible with
   the old URLs.
+* Properly support installing in Python 3 via PyPI.
 
 0.4.3 January 18, 2017
 ======================
