@@ -9,6 +9,7 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
     otp_token = forms.CharField(
         label=_("Token"),
     )
+    otp_device = forms.ChoiceField(required=False, choices=[])
 
     def __init__(self, user, **kwargs):
         super(TOTPAuthenticateForm, self).__init__(**kwargs)
