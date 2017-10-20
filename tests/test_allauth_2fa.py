@@ -4,8 +4,11 @@ import unittest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.core.urlresolvers import reverse
 from django.test import override_settings, TestCase
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
