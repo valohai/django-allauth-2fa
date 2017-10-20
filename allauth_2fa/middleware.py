@@ -1,7 +1,10 @@
 from django.shortcuts import redirect
 from django.conf import settings
 from django.contrib import messages
-from django.core.urlresolvers import resolve, reverse
+try:
+    from django.urls import resolve, reverse
+except ImportError:
+    from django.core.urlresolvers import resolve, reverse
 try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:

@@ -8,9 +8,12 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import redirect
+try:
+    from django.urls import reverse_lazy, reverse
+except ImportError:
+    from django.core.urlresolvers import reverse_lazy, reverse
 from django.views.generic import FormView, View, TemplateView
 
 from django_otp.plugins.otp_static.models import StaticToken
