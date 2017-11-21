@@ -1,5 +1,3 @@
-from hashlib import sha256
-
 from django.shortcuts import redirect
 from django.core.urlresolvers import resolve
 try:
@@ -84,9 +82,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
         # created by a redirect view), simply update the message text. Make sure
         # to mark the storage as not processed.
         storage = messages.get_messages(request)
-        # Base this on the class name so this can be subclassed multiple times,
-        # don't just use the class name though since this ends up in the HTML.
-        tag = sha256('{}.{}'.format(self.__module__, self.__name__)).hexdigest()
+        tag = '2fa_required'
         for m in storage:
             if m.extra_tags == tag:
                 m.message = self.require_2fa_message
