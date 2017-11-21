@@ -7,6 +7,8 @@ try:
 except ImportError:
     MiddlewareMixin = object
 
+from allauth.account.adapter import get_adapter
+
 
 class AllauthTwoFactorMiddleware(MiddlewareMixin):
     """
@@ -75,12 +77,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
             return
 
         # User already has two-factor configured, do nothing.
-        #
-        # Note that this is the same check that
-        # allauth_2fa.adapter.OTPAdapter.login uses to determine if the user
-        # must enter a token when trying to log in.
-        has_2fa_enabled = request.user.totpdevice_set.filter(confirmed=True).exists()
-        if has_2fa_enabled:
+        if get_adapter(request).has_2fa_enabled(request.user):
             return
 
         # If there is already a pending message related to two-factor (likely

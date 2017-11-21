@@ -11,10 +11,13 @@ from allauth.account.adapter import DefaultAccountAdapter
 
 
 class OTPAdapter(DefaultAccountAdapter):
+    def has_2fa_enabled(self, user):
+        """Returns True if the user has 2FA configured."""
+        return user.totpdevice_set.filter(confirmed=True).exists()
 
     def login(self, request, user):
         # Require two-factor authentication if it has been configured.
-        if user.totpdevice_set.filter(confirmed=True).exists():
+        if self.has_2fa_enabled(user):
             request.session['allauth_2fa_user_id'] = user.id
 
             redirect_url = reverse('two-factor-authenticate')
