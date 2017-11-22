@@ -3,9 +3,9 @@
 -e .
 
 
-django>=1.8
+django>=1.11
 django-allauth==0.26.1
-django-otp==0.3.5
+django-otp==0.4.1
 qrcode==5.3
 
 # Nice for development.
