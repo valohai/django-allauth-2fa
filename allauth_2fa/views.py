@@ -197,11 +197,16 @@ class QRCodeGeneratorView(View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
+        # Anonymous users can't have a TOTP device configured.
         if request.user.is_anonymous():
             raise Http404()
 
-        content_type = 'image/svg+xml; charset=utf-8'
         device = request.user.totpdevice_set.filter(confirmed=False).first()
+
+        # If no device is configured, raise a 404.
+        if not device:
+            raise Http404()
+
         secret_key = b32encode(device.bin_key).decode('utf-8')
         issuer = get_current_site(request).name
 
@@ -218,6 +223,6 @@ class QRCodeGeneratorView(View):
         )
 
         img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
-        response = HttpResponse(content_type=content_type)
+        response = HttpResponse(content_type='image/svg+xml; charset=utf-8')
         img.save(response)
         return response
