@@ -3,6 +3,14 @@
 Changelog
 #########
 
+0.4.5 xxxx
+==========
+
+* Avoid an exception if a user without any configured devices tries to view a QR
+  code. This view now properly 404s.
+* Redirect users to configure 2FA is they attempt to configure backup tokens
+  without enabling 2FA first.
+
 0.4.4 March 24, 2017
 ====================
 

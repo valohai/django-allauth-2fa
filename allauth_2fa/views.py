@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import redirect
 from django.views.generic import FormView, View, TemplateView
@@ -98,7 +98,7 @@ class TwoFactorSetup(FormView):
 
         # If the user has 2FA setup already, redirect them to the backup tokens.
         if request.user.totpdevice_set.filter(confirmed=True).exists():
-            return HttpResponseRedirect(reverse_lazy('two-factor-backup-tokens'))
+            return HttpResponseRedirect(reverse('two-factor-backup-tokens'))
 
         return super(TwoFactorSetup, self).dispatch(request, *args, **kwargs)
 
@@ -148,7 +148,7 @@ class TwoFactorRemove(FormView):
         if request.user.totpdevice_set.exists():
             return super(TwoFactorRemove, self).dispatch(request, *args, **kwargs)
         else:
-            return HttpResponseRedirect(reverse_lazy('two-factor-setup'))
+            return HttpResponseRedirect(reverse('two-factor-setup'))
 
     def form_valid(self, form):
         form.save()
@@ -169,7 +169,10 @@ class TwoFactorBackupTokens(TemplateView):
         if request.user.is_anonymous():
             return redirect_to_login(self.request.get_full_path())
 
-        return super(TwoFactorBackupTokens, self).dispatch(request, *args, **kwargs)
+        if request.user.totpdevice_set.exists():
+            return super(TwoFactorBackupTokens, self).dispatch(request, *args, **kwargs)
+        else:
+            return HttpResponseRedirect(reverse('two-factor-setup'))
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorBackupTokens, self).get_context_data(*kwargs)
@@ -197,11 +200,16 @@ class QRCodeGeneratorView(View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
+        # Anonymous users can't have a TOTP device configured.
         if request.user.is_anonymous():
             raise Http404()
 
-        content_type = 'image/svg+xml; charset=utf-8'
         device = request.user.totpdevice_set.filter(confirmed=False).first()
+
+        # If no device is configured, raise a 404.
+        if not device:
+            raise Http404()
+
         secret_key = b32encode(device.bin_key).decode('utf-8')
         issuer = get_current_site(request).name
 
@@ -218,6 +226,6 @@ class QRCodeGeneratorView(View):
         )
 
         img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
-        response = HttpResponse(content_type=content_type)
+        response = HttpResponse(content_type='image/svg+xml; charset=utf-8')
         img.save(response)
         return response

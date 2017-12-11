@@ -249,6 +249,43 @@ class Test2Factor(TestCase):
         # Ensure the signal is received as expected.
         self.assertEqual(self.user_logged_in_count, 1)
 
+    def test_not_configured_redirect(self):
+        """Viewing backup codes or disabling 2FA should redirect if 2FA is not configured."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+
+        # Login
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'})
+
+        # The 2FA pages should redirect.
+        for url_name in ['two-factor-backup-tokens', 'two-factor-remove']:
+            resp = self.client.get(reverse(url_name))
+            self.assertRedirects(resp,
+                                 reverse('two-factor-setup'),
+                                 fetch_redirect_response=False)
+
+    def test_qr_code_anonymous(self):
+        """The QR code should not error for anonymous users."""
+        resp = self.client.get(reverse('two-factor-qr-code'))
+        self.assertEqual(resp.status_code, 404)
+
+    def test_qr_code_no_device(self):
+        """The QR code should not error for users that don't have TOTP devices."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+
+        # Login first.
+        self.client.post(reverse('account_login'),
+                         {'login': 'john',
+                          'password': 'doe'})
+
+        # Then try to get the QR code.
+        resp = self.client.get(reverse('two-factor-qr-code'))
+        self.assertEqual(resp.status_code, 404)
 
 @unittest.skipIf(not MiddlewareMixin, 'Additional middleware tests are Django > 1.10.')
 @override_settings(MIDDLEWARE=settings.MIDDLEWARE_CLASSES, MIDDLEWARE_CLASSES=[])
