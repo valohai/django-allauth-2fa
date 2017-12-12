@@ -169,10 +169,24 @@ django-allauth-2fa useful!
 #. Send a pull request and bug the maintainer until it gets merged and
    published.
 
-The test project can be used as a minimal example using the following:
+Running tests
+'''''''''''''
+
+Tests can be run using the standard Django testing facility:
 
 .. code-block:: bash
 
+    python manage.py test
+
+Running the test project
+''''''''''''''''''''''''
+
+The test project can also be used as a minimal example using the following:
+
+.. code-block:: bash
+
+    # Migrate the SQLite database first.
+    DJANGO_SETTINGS_MODULE=tests.run_settings python manage.py migrate
     # Run the server with debug.
     DJANGO_SETTINGS_MODULE=tests.run_settings python manage.py runserver_plus
     # Run the shell.
