@@ -1,5 +1,7 @@
 from django.shortcuts import redirect
-from django.core.urlresolvers import resolve
+from django.conf import settings
+from django.contrib import messages
+from django.core.urlresolvers import resolve, reverse
 try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
@@ -50,6 +52,31 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
     # The message to the user if they don't have 2FA enabled and must enable it.
     require_2fa_message = "You must enable two-factor authentication before doing anything else."
 
+    def on_require_2fa(self, request):
+        """
+        If the current request requires 2FA and the user does not have it
+        enabled, this is executed. The result of this is returned from the
+        middleware.
+        """
+        # See allauth.account.adapter.DefaultAccountAdapter.add_message.
+        if 'django.contrib.messages' in settings.INSTALLED_APPS:
+            # If there is already a pending message related to two-factor (likely
+            # created by a redirect view), simply update the message text.
+            storage = messages.get_messages(request)
+            tag = '2fa_required'
+            for m in storage:
+                if m.extra_tags == tag:
+                    m.message = self.require_2fa_message
+                    break
+            # Otherwise, create a new message.
+            else:
+                messages.error(request, self.require_2fa_message, extra_tags=tag)
+            # Mark the storage as not processed so they'll be shown to the user.
+            storage.used = False
+
+        # Redirect user to two-factor setup page.
+        return redirect('two-factor-setup')
+
     def require_2fa(self, request):
         """
         Check if this request is required to have 2FA before accessing the app.
@@ -78,20 +105,5 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
         if get_adapter(request).has_2fa_enabled(request.user):
             return
 
-        # If there is already a pending message related to two-factor (likely
-        # created by a redirect view), simply update the message text. Make sure
-        # to mark the storage as not processed.
-        storage = messages.get_messages(request)
-        tag = '2fa_required'
-        for m in storage:
-            if m.extra_tags == tag:
-                m.message = self.require_2fa_message
-                storage.used = False
-                break
-        # Otherwise, create a new message.
-        else:
-            storage.used = False
-            messages.error(request, self.require_2fa_message, extra_tags=tag)
-
-        # Redirect user to two-factor setup page.
-        return redirect('two-factor-setup')
+        # The request required 2FA but it isn't configured!
+        return self.on_require_2fa(request)

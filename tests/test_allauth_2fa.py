@@ -15,6 +15,8 @@ from allauth.account.signals import user_logged_in
 
 from django_otp.oath import TOTP
 
+from allauth_2fa.middleware import BaseRequire2FAMiddleware
+
 
 class Test2Factor(TestCase):
     def setUp(self):
@@ -291,3 +293,79 @@ class Test2Factor(TestCase):
 @override_settings(MIDDLEWARE=settings.MIDDLEWARE_CLASSES, MIDDLEWARE_CLASSES=[])
 class Test2FactorMiddleware(deepcopy(Test2Factor)):
     """Test the 2FA code when using MIDDLEWARE instead of MIDDLEWARE_CLASSES."""
+
+
+class Require2FA(BaseRequire2FAMiddleware):
+    def require_2fa(self, request):
+        return True
+
+
+@override_settings(
+    # Add the middleware that requires 2FA.
+    MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES + ('tests.test_allauth_2fa.Require2FA',),
+    # Don't redirect to an "allowed" URL.
+    LOGIN_REDIRECT_URL='/unnamed-view'
+)
+class TestRequire2FAMiddleware(TestCase):
+    def test_no_2fa(self):
+        """Test login behavior when 2FA is not configured."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'},
+                                follow=True)
+        # The user is redirected to the 2FA setup page.
+        self.assertRedirects(resp,
+                             reverse('two-factor-setup'),
+                             fetch_redirect_response=False)
+
+    def test_2fa(self):
+        """Test login behavior when 2FA is configured."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+        totp_model = user.totpdevice_set.create()
+
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'})
+        self.assertRedirects(resp,
+                             reverse('two-factor-authenticate'),
+                             fetch_redirect_response=False)
+
+        # Now ensure that logging in actually works.
+        totp = TOTP(totp_model.bin_key, totp_model.step, totp_model.t0, totp_model.digits)
+        resp = self.client.post(reverse('two-factor-authenticate'),
+                                {'otp_token': totp.token()})
+        # The user ends up on the normal redirect login page.
+        self.assertRedirects(resp,
+                             settings.LOGIN_REDIRECT_URL,
+                             fetch_redirect_response=False)
+
+    @override_settings(
+        INSTALLED_APPS=settings.INSTALLED_APPS + ('django.contrib.messages', ),
+        # This doesn't seem to stack nicely with the class-based one, so add the
+        # middleware here.
+        MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES + (
+            'tests.test_allauth_2fa.Require2FA',
+            'django.contrib.messages.middleware.MessageMiddleware',
+        )
+    )
+    def test_no_2fa_messages(self):
+        """Test login behavior when 2FA is not configured and the messages framework is in use."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'},
+                                follow=True)
+
+        # The user is redirected to the 2FA setup page.
+        self.assertRedirects(resp,
+                             reverse('two-factor-setup'),
+                             fetch_redirect_response=False)
