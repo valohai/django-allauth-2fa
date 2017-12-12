@@ -90,7 +90,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # The user is not logged in, do nothing.
-        if request.user.is_anonymous:
+        if request.user.is_anonymous():
             return
 
         # If this doesn't require 2FA, then stop processing.
