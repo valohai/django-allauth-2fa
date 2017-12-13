@@ -1,6 +1,9 @@
 from django.conf.urls import include, url
+from django.http import HttpResponse
 
-from allauth_2fa import views
+def blank_view(request):
+    return HttpResponse("<h1>HELLO WORLD!</h1>")
+
 
 urlpatterns = [
     # Include the allauth and 2FA urls from their respective packages.
@@ -8,5 +11,5 @@ urlpatterns = [
     url(r'^accounts/', include('allauth.urls')),
 
     # A view without a name.
-    url(r"^unnamed-view$", views.TwoFactorAuthenticate.as_view()),
+    url(r"^unnamed-view$", blank_view),
 ]

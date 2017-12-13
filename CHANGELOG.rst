@@ -10,6 +10,8 @@ Changelog
   code. This view now properly 404s.
 * Redirect users to configure 2FA is they attempt to configure backup tokens
   without enabling 2FA first.
+* Add base middleware to ensure particular users (e.g. superusers) have 2FA
+  enabled.
 
 0.4.4 March 24, 2017
 ====================
