@@ -1,6 +1,7 @@
 from copy import deepcopy
 import unittest
 
+import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
@@ -19,6 +20,12 @@ from allauth.account.signals import user_logged_in
 from django_otp.oath import TOTP
 
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
+
+
+if django.VERSION > (1, 10):
+    MIDDLEWARE_VAR = 'MIDDLEWARE'
+else:
+    MIDDLEWARE_VAR = 'MIDDLEWARE_CLASSES'
 
 
 class Test2Factor(TestCase):
@@ -292,11 +299,6 @@ class Test2Factor(TestCase):
         resp = self.client.get(reverse('two-factor-qr-code'))
         self.assertEqual(resp.status_code, 404)
 
-@unittest.skipIf(not MiddlewareMixin, 'Additional middleware tests are Django > 1.10.')
-@override_settings(MIDDLEWARE=settings.MIDDLEWARE_CLASSES, MIDDLEWARE_CLASSES=[])
-class Test2FactorMiddleware(deepcopy(Test2Factor)):
-    """Test the 2FA code when using MIDDLEWARE instead of MIDDLEWARE_CLASSES."""
-
 
 class Require2FA(BaseRequire2FAMiddleware):
     def require_2fa(self, request):
@@ -304,10 +306,10 @@ class Require2FA(BaseRequire2FAMiddleware):
 
 
 @override_settings(
-    # Add the middleware that requires 2FA.
-    MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES + ('tests.test_allauth_2fa.Require2FA',),
     # Don't redirect to an "allowed" URL.
-    LOGIN_REDIRECT_URL='/unnamed-view'
+    LOGIN_REDIRECT_URL='/unnamed-view',
+    # Add the middleware that requires 2FA.
+    **{MIDDLEWARE_VAR: getattr(settings, MIDDLEWARE_VAR) + ('tests.test_allauth_2fa.Require2FA',)}
 )
 class TestRequire2FAMiddleware(TestCase):
     def test_no_2fa(self):
@@ -352,10 +354,10 @@ class TestRequire2FAMiddleware(TestCase):
         INSTALLED_APPS=settings.INSTALLED_APPS + ('django.contrib.messages', ),
         # This doesn't seem to stack nicely with the class-based one, so add the
         # middleware here.
-        MIDDLEWARE_CLASSES=settings.MIDDLEWARE_CLASSES + (
+        **{MIDDLEWARE_VAR: getattr(settings, MIDDLEWARE_VAR) + (
             'tests.test_allauth_2fa.Require2FA',
             'django.contrib.messages.middleware.MessageMiddleware',
-        )
+        )}
     )
     def test_no_2fa_messages(self):
         """Test login behavior when 2FA is not configured and the messages framework is in use."""

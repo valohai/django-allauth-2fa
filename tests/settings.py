@@ -1,3 +1,5 @@
+import django
+
 SECRET_KEY = 'not_empty'
 SITE_ID = 1
 ALLOWED_HOSTS = ['*']
@@ -57,11 +59,10 @@ INSTALLED_APPS = (
     'tests',
 )
 
-MIDDLEWARE_CLASSES = (
+MW = (
     # Configure Django auth package.
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
 
     # Configure the django-otp package.
     'django_otp.middleware.OTPMiddleware',
@@ -69,6 +70,14 @@ MIDDLEWARE_CLASSES = (
     # Reset login flow middleware.
     'allauth_2fa.middleware.AllauthTwoFactorMiddleware',
 )
+
+if django.VERSION < (2,):
+    MW += ('django.contrib.auth.middleware.SessionAuthenticationMiddleware',)
+
+if django.VERSION > (1, 10):
+    MIDDLEWARE = MW
+else:
+    MIDDLEWARE_CLASSES = MW
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
