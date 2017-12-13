@@ -8,9 +8,12 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.urlresolvers import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import redirect
+try:
+    from django.urls import reverse_lazy, reverse
+except ImportError:
+    from django.core.urlresolvers import reverse_lazy, reverse
 from django.views.generic import FormView, View, TemplateView
 
 from django_otp.plugins.otp_static.models import StaticToken
@@ -22,6 +25,7 @@ from qrcode.image.svg import SvgPathImage
 from allauth.account import signals
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import get_login_redirect_url
+from allauth.compat import is_anonymous
 
 from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import (TOTPDeviceForm,
@@ -93,7 +97,7 @@ class TwoFactorSetup(FormView):
     def dispatch(self, request, *args, **kwargs):
         # TODO Once Django 1.9 is the minimum supported version, see if we can
         # use LoginRequiredMixin.
-        if request.user.is_anonymous():
+        if is_anonymous(request.user):
             return redirect_to_login(self.request.get_full_path())
 
         # If the user has 2FA setup already, redirect them to the backup tokens.
@@ -142,7 +146,7 @@ class TwoFactorRemove(FormView):
     def dispatch(self, request, *args, **kwargs):
         # TODO Once Django 1.9 is the minimum supported version, see if we can
         # use LoginRequiredMixin.
-        if request.user.is_anonymous():
+        if is_anonymous(request.user):
             return redirect_to_login(self.request.get_full_path())
 
         if request.user.totpdevice_set.exists():
@@ -166,7 +170,7 @@ class TwoFactorBackupTokens(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         # TODO Once Django 1.9 is the minimum supported version, see if we can
         # use LoginRequiredMixin.
-        if request.user.is_anonymous():
+        if is_anonymous(request.user):
             return redirect_to_login(self.request.get_full_path())
 
         if request.user.totpdevice_set.exists():
@@ -201,7 +205,7 @@ class QRCodeGeneratorView(View):
 
     def get(self, request, *args, **kwargs):
         # Anonymous users can't have a TOTP device configured.
-        if request.user.is_anonymous():
+        if is_anonymous(request.user):
             raise Http404()
 
         device = request.user.totpdevice_set.filter(confirmed=False).first()

@@ -3,8 +3,8 @@
 Changelog
 #########
 
-0.4.5 xxxx
-==========
+0.5 xxxx
+========
 
 * Avoid an exception if a user without any configured devices tries to view a QR
   code. This view now properly 404s.
@@ -12,6 +12,9 @@ Changelog
   without enabling 2FA first.
 * Add base middleware to ensure particular users (e.g. superusers) have 2FA
   enabled.
+* Drop official support for Django 1.9 and 1.10, they're
+  [no longer supported](https://www.djangoproject.com/download/#supported-versions)
+  by the Django project.
 
 0.4.4 March 24, 2017
 ====================
