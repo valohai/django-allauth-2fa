@@ -11,6 +11,7 @@ except ImportError:
     MiddlewareMixin = object
 
 from allauth.account.adapter import get_adapter
+from allauth.compat import is_anonymous
 
 
 class AllauthTwoFactorMiddleware(MiddlewareMixin):
@@ -93,7 +94,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # The user is not logged in, do nothing.
-        if request.user.is_anonymous():
+        if is_anonymous(request.user):
             return
 
         # If this doesn't require 2FA, then stop processing.
