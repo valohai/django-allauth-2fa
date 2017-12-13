@@ -1,5 +1,5 @@
-django-allauth-2fa
-==================
+Welcome to django-allauth-2fa!
+==============================
 
 .. image:: https://travis-ci.org/percipient/django-allauth-2fa.svg?branch=master
     :target: https://travis-ci.org/percipient/django-allauth-2fa
@@ -7,9 +7,12 @@ django-allauth-2fa
 .. image:: https://coveralls.io/repos/github/percipient/django-allauth-2fa/badge.svg?branch=master
     :target: https://coveralls.io/github/percipient/django-allauth-2fa?branch=master
 
-django-allauth-2fa adds `two-factor authentication`_ to `django-allauth`_, a set
-of `Django`_ applications which help with authentication, registration, and
-other account management tasks.
+django-allauth-2fa adds `two-factor authentication`_ to `django-allauth`_.
+django-allauth is a set of `Django`_ applications which help with
+authentication, registration, and other account management tasks.
+
+Source code
+    http://github.com/percipient/django-allauth-2fa
 
 .. _two-factor authentication: https://en.wikipedia.org/wiki/Multi-factor_authentication
 .. _django-allauth: https://github.com/pennersr/django-allauth
@@ -22,139 +25,8 @@ Features
 * Supports Authenticator apps via a QR code when enabling 2FA.
 * Supports single-use back-up codes.
 
-Installation
+Contributing
 ------------
-
-Install `django-allauth-2fa` with pip (note that this will install Django,
-django-allauth, django-otp, qrcode and all of their requirements):
-
-.. _django-otp: https://bitbucket.org/psagers/django-otp/
-.. _qrcode: https://github.com/lincolnloop/python-qrcode
-
-.. code-block:: bash
-
-    pip install django-allauth-2fa
-
-After all the pre-requisities are installed, django-allauth and django-otp must
-be configured in your Django settings file. (Please check the
-`django-allauth documentation`_ and `django-otp documentation`_ for more
-in-depth steps on their configuration.)
-
-.. _django-allauth documentation: https://django-allauth.readthedocs.io/en/latest/installation.html
-.. _django-otp documentation: http://pythonhosted.org/django-otp/overview.html#installation
-
-.. code-block:: python
-
-    INSTALLED_APPS = (
-        # Required by allauth.
-        'django.contrib.sites',
-
-        # Configure Django auth package.
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-
-        # Enable allauth.
-        'allauth',
-        'allauth.account',
-
-        # Configure the django-otp package.
-        'django_otp',
-        'django_otp.plugins.otp_totp',
-        'django_otp.plugins.otp_static',
-
-        # Enable two-factor auth.
-        'allauth_2fa',
-    )
-
-    MIDDLEWARE_CLASSES = (
-        # Configure Django auth package.
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-
-        # Configure the django-otp package. Note this must be after the
-        # AuthenticationMiddleware.
-        'django_otp.middleware.OTPMiddleware',
-
-        # Reset login flow middleware. If this middleware is included, the login
-        # flow is reset if another page is loaded between login and successfully
-        # entering two-factor credentials.
-        'allauth_2fa.middleware.AllauthTwoFactorMiddleware',
-    )
-
-    # Set the allauth adapter to be the 2FA adapter.
-    ACCOUNT_ADAPTER = 'allauth_2fa.adapter.OTPAdapter'
-
-    # Configure your default site. See
-    # https://docs.djangoproject.com/en/dev/ref/settings/#sites.
-    SITE_ID = 1
-
-After the above is configure, you must run migrations.
-
-.. code-block:: bash
-
-    python manage.py migrate
-
-Finally, you must include the django-allauth-2fa URLs:
-
-.. code-block:: python
-
-    from django.conf.urls import include, url
-
-    urlpatterns = [
-        # Include the allauth and 2FA urls from their respective packages.
-        url(r'^', include('allauth_2fa.urls')),
-        url(r'^', include('allauth.urls')),
-    ]
-
-.. warning::
-
-    Any login view that is *not* provided by django-allauth will bypass the
-    allauth workflow (including two-factor authentication). The Django admin
-    site includes an additional login view (usually available at
-    ``/admin/login``).
-
-    The easiest way to fix this is to wrap it in ``login_required`` decorator
-    (the code only works if you use the standard admin site, if you have a
-    custom admin site you'll need to customize this more):
-
-    .. code-block:: python
-
-        from django.contrib import admin
-        from django.contrib.auth.decorators import login_required
-
-        # Ensure users go through the allauth workflow when logging into admin.
-        admin.site.login = login_required(admin.site.login)
-        # Run the standard admin set-up.
-        admin.autodiscover()
-
-Advanced Configuration
-----------------------
-
-Forcing a User to Use 2FA
-'''''''''''''''''''''''''
-
-A ``User`` can be forced to use 2FA based on any requirements (e.g. superusers
-or being in a particular group). This is implemented by subclassing the
-``allauth_2fa.middleware.BaseRequire2FAMiddleware`` and implementing the
-``require_2fa`` method on it. This middleware needs to be added to your
-``MIDDLEWARE_CLASSES`` setting.
-
-For example, to require a user to be a superuser:
-
-.. code-block:: python
-
-    from allauth_2fa.middleware import BaseRequire2FAMiddleware
-
-    class RequireSuperuser2FAMiddleware(BaseRequire2FAMiddleware):
-        def require_2fa(self, request):
-            # Superusers are require to have 2FA.
-            return request.user.is_superuser
-
-If the user doesn't have 2FA enabled they will be redirected to the 2FA
-configuration page and will not be allowed to access (most) other pages.
-
-Contribute
-----------
 
 django-allauth-2fa was initially created by
 `Víðir Valberg Guðmundsson (@valberg)`_, and is currently maintained by

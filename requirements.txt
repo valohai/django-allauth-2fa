@@ -16,3 +16,8 @@ Werkzeug==0.11.11
 # Style checking.
 flake8==3.5.0
 flake8-import-order==0.16
+
+# For documentation.
+Sphinx==1.6.5
+sphinx-autobuild==0.7.1   # To auto-build docs as they're edited.
+sphinx-rtd-theme==0.2.4   # The Read the Docs theme for Sphinx.

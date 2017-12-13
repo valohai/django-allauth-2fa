@@ -13,7 +13,7 @@ Changelog
 * Add base middleware to ensure particular users (e.g. superusers) have 2FA
   enabled.
 * Drop official support for Django 1.9 and 1.10, they're
-  [no longer supported](https://www.djangoproject.com/download/#supported-versions)
+  `no longer supported <https://www.djangoproject.com/download/#supported-versions>`_
   by the Django project.
 
 0.4.4 March 24, 2017

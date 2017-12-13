@@ -13,3 +13,6 @@ django_allauth_2fa.egg-info/
 # Testing
 .coverage
 .tox
+
+# Docs
+_build
