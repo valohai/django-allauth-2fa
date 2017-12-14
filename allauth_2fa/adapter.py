@@ -3,14 +3,14 @@ try:
 except ImportError:
     from urllib import urlencode
 
+from allauth.account.adapter import DefaultAccountAdapter
+from allauth.exceptions import ImmediateHttpResponse
+
 from django.http import HttpResponseRedirect
 try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
-
-from allauth.exceptions import ImmediateHttpResponse
-from allauth.account.adapter import DefaultAccountAdapter
 
 
 class OTPAdapter(DefaultAccountAdapter):

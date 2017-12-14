@@ -1,4 +1,6 @@
-from django.shortcuts import redirect
+from allauth.account.adapter import get_adapter
+from allauth.compat import is_anonymous
+
 from django.conf import settings
 from django.contrib import messages
 try:
@@ -9,9 +11,7 @@ try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
     MiddlewareMixin = object
-
-from allauth.account.adapter import get_adapter
-from allauth.compat import is_anonymous
+from django.shortcuts import redirect
 
 
 class AllauthTwoFactorMiddleware(MiddlewareMixin):
