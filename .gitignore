@@ -3,10 +3,13 @@ __pycache__/
 *.sw*
 db.sqlite
 .idea/
-.tox/
 
 # Distributions.
 .eggs/
 build/
 dist/
 django_allauth_2fa.egg-info/
+
+# Testing
+.coverage
+.tox

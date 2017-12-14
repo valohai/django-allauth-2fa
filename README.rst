@@ -4,6 +4,9 @@ django-allauth-2fa
 .. image:: https://travis-ci.org/percipient/django-allauth-2fa.svg?branch=master
     :target: https://travis-ci.org/percipient/django-allauth-2fa
 
+.. image:: https://coveralls.io/repos/github/percipient/django-allauth-2fa/badge.svg?branch=master
+    :target: https://coveralls.io/github/percipient/django-allauth-2fa?branch=master
+
 django-allauth-2fa adds `two-factor authentication`_ to `django-allauth`_, a set
 of `Django`_ applications which help with authentication, registration, and
 other account management tasks.

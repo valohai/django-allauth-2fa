@@ -1,8 +1,20 @@
 language: python
 # This version of python is only used to run tox.
 python: 3.6
-script: tox
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $TRAVIS_BUILD_DIR/.tox
+
 notifications:
   email: false
+
 install:
-  - pip install tox
+  - pip install coveralls tox
+
+script:
+  - tox
+
+after_success:
+  - coveralls
