@@ -1,6 +1,7 @@
 from django.conf.urls import include, url
 from django.http import HttpResponse
 
+
 def blank_view(request):
     return HttpResponse("<h1>HELLO WORLD!</h1>")
 

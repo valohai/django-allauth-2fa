@@ -1,10 +1,8 @@
-from copy import deepcopy
-import unittest
+from allauth.account.signals import user_logged_in
 
 import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
 from django.test import override_settings, TestCase
 try:
     from django.urls import reverse
@@ -14,8 +12,6 @@ try:
     from django.utils.deprecation import MiddlewareMixin
 except ImportError:
     MiddlewareMixin = None
-
-from allauth.account.signals import user_logged_in
 
 from django_otp.oath import TOTP
 
@@ -83,7 +79,7 @@ class Test2Factor(TestCase):
         user = get_user_model().objects.create(username='john')
         user.set_password('doe')
         user.save()
-        totp_model = user.totpdevice_set.create()
+        user.totpdevice_set.create()
 
         resp = self.client.post(reverse('account_login'),
                                 {'login': 'john',
@@ -164,7 +160,7 @@ class Test2Factor(TestCase):
         user = get_user_model().objects.create(username='john')
         user.set_password('doe')
         user.save()
-        totp_model = user.totpdevice_set.create()
+        user.totpdevice_set.create()
 
         # Add a next to unnamed-view.
         resp = self.client.post(reverse('account_login') + '?next=unnamed-view',
@@ -181,8 +177,6 @@ class Test2Factor(TestCase):
         """
         Views should not be hittable via an AnonymousUser.
         """
-        user = AnonymousUser()
-
         # The authentication page redirects to the login page.
         url = reverse('two-factor-authenticate')
         resp = self.client.get(url)

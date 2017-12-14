@@ -1,0 +1,13 @@
+[flake8]
+ignore =
+    # We put new lines between different packages for imports.
+    I202
+exclude =
+    .git,
+    .tox,
+    __pycache__,
+    # The * import causes lots of false positives.
+    tests/run_settings.py
+max-line-length = 150
+application-import-names = allauth_2fa, manage, tests
+import-order-style = appnexus
