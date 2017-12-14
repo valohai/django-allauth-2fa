@@ -4,6 +4,7 @@ ignore =
     I202
 exclude =
     .git,
+    .tox,
     __pycache__,
     # The * import causes lots of false positives.
     tests/run_settings.py
