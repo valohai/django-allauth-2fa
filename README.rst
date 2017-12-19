@@ -7,12 +7,17 @@ Welcome to django-allauth-2fa!
 .. image:: https://coveralls.io/repos/github/percipient/django-allauth-2fa/badge.svg?branch=master
     :target: https://coveralls.io/github/percipient/django-allauth-2fa?branch=master
 
+.. image:: https://readthedocs.org/projects/django-allauth-2fa/badge/?version=latest
+    :target: https://django-allauth-2fa.readthedocs.io/
+
 django-allauth-2fa adds `two-factor authentication`_ to `django-allauth`_.
 django-allauth is a set of `Django`_ applications which help with
 authentication, registration, and other account management tasks.
 
 Source code
     http://github.com/percipient/django-allauth-2fa
+Documentation
+    https://django-allauth-2fa.readthedocs.io/
 
 .. _two-factor authentication: https://en.wikipedia.org/wiki/Multi-factor_authentication
 .. _django-allauth: https://github.com/pennersr/django-allauth
