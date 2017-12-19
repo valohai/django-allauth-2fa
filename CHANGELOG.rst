@@ -15,6 +15,8 @@ Changelog
 * Drop official support for Django 1.9 and 1.10, they're
   `no longer supported <https://www.djangoproject.com/download/#supported-versions>`_
   by the Django project.
+* Added Sphinx-generated documentation. A rendered version
+  `is available at <https://django-allauth-2fa.readthedocs.io/>`_.
 
 0.4.4 March 24, 2017
 ====================
