@@ -3,8 +3,8 @@
 Changelog
 #########
 
-0.5 xxxx
-========
+0.5 December 21, 2017
+=====================
 
 * Avoid an exception if a user without any configured devices tries to view a QR
   code. This view now properly 404s.
