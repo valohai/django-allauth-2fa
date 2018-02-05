@@ -1,5 +1,4 @@
 from allauth.account.adapter import get_adapter
-from allauth.compat import is_anonymous
 
 from django.conf import settings
 from django.contrib import messages
@@ -94,7 +93,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # The user is not logged in, do nothing.
-        if is_anonymous(request.user):
+        if request.user.is_anonymous:
             return
 
         # If this doesn't require 2FA, then stop processing.

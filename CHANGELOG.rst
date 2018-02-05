@@ -3,6 +3,12 @@
 Changelog
 #########
 
+0.6 xxx xx, 2018
+================
+
+* Drop support for Django < 1.11, these are no longer supported by
+  django-allauth (as of 0.35.0).
+
 0.5 December 21, 2017
 =====================
 
