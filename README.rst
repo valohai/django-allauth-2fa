@@ -30,6 +30,17 @@ Features
 * Supports Authenticator apps via a QR code when enabling 2FA.
 * Supports single-use back-up codes.
 
+Compatibility
+-------------
+
+django-allauth-2fa attempts to maintain compatibility with supported versions of
+Django, django-allauth, and django-otp. Current minimum versions are listed
+below:
+
+* Django 1.11
+* django-allauth 0.25.0
+* django-otp 0.3.12
+
 Contributing
 ------------
 
