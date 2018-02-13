@@ -12,14 +12,14 @@ def long_description():
 
 setup(
     name="django-allauth-2fa",
-    version="0.5.dev",
+    version="0.6",
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "django>=1.8",
+        "django>=1.11",
         "qrcode>=5.3",
-        "django-allauth>=0.26.1",
-        "django-otp>=0.3.5",
+        "django-allauth>=0.25",
+        "django-otp>=0.3.12",
     ],
     author="Víðir Valberg Guðmundsson",
     author_email="valberg@orn.li",
