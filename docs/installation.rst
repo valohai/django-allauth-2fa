@@ -17,7 +17,7 @@ be configured in your Django settings file. (Please check the
 in-depth steps on their configuration.)
 
 .. _django-allauth documentation: https://django-allauth.readthedocs.io/en/latest/installation.html
-.. _django-otp documentation: http://pythonhosted.org/django-otp/overview.html#installation
+.. _django-otp documentation: https://django-otp-official.readthedocs.io/en/latest/overview.html#installation
 
 .. code-block:: python
 
