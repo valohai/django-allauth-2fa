@@ -3,6 +3,12 @@
 Changelog
 #########
 
+next
+====
+
+* Remove more code that was for Django < 1.11.
+* Officially support Django 2.0 and Django 2.1.
+
 0.6 February 13, 2018
 =====================
 
