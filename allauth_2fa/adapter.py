@@ -7,10 +7,7 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.exceptions import ImmediateHttpResponse
 
 from django.http import HttpResponseRedirect
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 
 class OTPAdapter(DefaultAccountAdapter):
