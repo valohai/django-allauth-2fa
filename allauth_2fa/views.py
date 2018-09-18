@@ -14,10 +14,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
-try:
-    from django.urls import reverse_lazy, reverse
-except ImportError:
-    from django.core.urlresolvers import reverse_lazy, reverse
+from django.urls import reverse, reverse_lazy
 from django.views.generic import FormView, TemplateView, View
 
 from django_otp.plugins.otp_static.models import StaticToken

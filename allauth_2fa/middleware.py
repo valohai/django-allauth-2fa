@@ -2,15 +2,9 @@ from allauth.account.adapter import get_adapter
 
 from django.conf import settings
 from django.contrib import messages
-try:
-    from django.urls import resolve, reverse
-except ImportError:
-    from django.core.urlresolvers import resolve, reverse
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except ImportError:
-    MiddlewareMixin = object
 from django.shortcuts import redirect
+from django.urls import resolve, reverse
+from django.utils.deprecation import MiddlewareMixin
 
 
 class AllauthTwoFactorMiddleware(MiddlewareMixin):

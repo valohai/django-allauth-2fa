@@ -59,7 +59,7 @@ INSTALLED_APPS = (
     'tests',
 )
 
-MW = (
+MIDDLEWARE = (
     # Configure Django auth package.
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -72,12 +72,7 @@ MW = (
 )
 
 if django.VERSION < (2,):
-    MW += ('django.contrib.auth.middleware.SessionAuthenticationMiddleware',)
-
-if django.VERSION > (1, 10):
-    MIDDLEWARE = MW
-else:
-    MIDDLEWARE_CLASSES = MW
+    MIDDLEWARE += ('django.contrib.auth.middleware.SessionAuthenticationMiddleware',)
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',

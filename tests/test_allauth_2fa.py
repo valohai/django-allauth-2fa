@@ -1,27 +1,13 @@
 from allauth.account.signals import user_logged_in
 
-import django
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import override_settings, TestCase
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
-try:
-    from django.utils.deprecation import MiddlewareMixin
-except ImportError:
-    MiddlewareMixin = None
+from django.urls import reverse
 
 from django_otp.oath import TOTP
 
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
-
-
-if django.VERSION > (1, 10):
-    MIDDLEWARE_VAR = 'MIDDLEWARE'
-else:
-    MIDDLEWARE_VAR = 'MIDDLEWARE_CLASSES'
 
 
 class Test2Factor(TestCase):
@@ -303,7 +289,7 @@ class Require2FA(BaseRequire2FAMiddleware):
     # Don't redirect to an "allowed" URL.
     LOGIN_REDIRECT_URL='/unnamed-view',
     # Add the middleware that requires 2FA.
-    **{MIDDLEWARE_VAR: getattr(settings, MIDDLEWARE_VAR) + ('tests.test_allauth_2fa.Require2FA',)}
+    MIDDLEWARE=settings.MIDDLEWARE + ('tests.test_allauth_2fa.Require2FA',)
 )
 class TestRequire2FAMiddleware(TestCase):
     def test_no_2fa(self):
@@ -348,10 +334,10 @@ class TestRequire2FAMiddleware(TestCase):
         INSTALLED_APPS=settings.INSTALLED_APPS + ('django.contrib.messages', ),
         # This doesn't seem to stack nicely with the class-based one, so add the
         # middleware here.
-        **{MIDDLEWARE_VAR: getattr(settings, MIDDLEWARE_VAR) + (
+        MIDDLEWARE=settings.MIDDLEWARE + (
             'tests.test_allauth_2fa.Require2FA',
             'django.contrib.messages.middleware.MessageMiddleware',
-        )}
+        ),
     )
     def test_no_2fa_messages(self):
         """Test login behavior when 2FA is not configured and the messages framework is in use."""
