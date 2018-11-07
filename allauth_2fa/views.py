@@ -211,19 +211,21 @@ class QRCodeGeneratorView(View):
         if not device:
             raise Http404()
 
-        secret_key = b32encode(device.bin_key).decode('utf-8')
         issuer = get_current_site(request).name
+        params = {
+            'secret': b32encode(device.bin_key).decode('utf-8'),
+            'algorithm': 'SHA1',
+            'digits': device.digits,
+            'period': device.step,
+        }
+        label = '{issuer}: {username}'.format(
+            issuer=issuer,
+            username=request.user.get_username()
+        )
 
         otpauth_url = 'otpauth://totp/{label}?{query}'.format(
-            label=quote('{issuer}: {username}'.format(
-                issuer=issuer,
-                username=request.user.get_username()
-            )),
-            query=urlencode((
-                ('secret', secret_key),
-                ('digits', device.get_digits_display()),
-                ('issuer', issuer),
-            ))
+            label=quote(label),
+            query=urlencode(params),
         )
 
         img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
