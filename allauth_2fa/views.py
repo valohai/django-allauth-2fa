@@ -1,5 +1,3 @@
-from base64 import b32encode
-
 from django.core.exceptions import ObjectDoesNotExist
 
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
@@ -25,15 +23,13 @@ from django.views.generic import FormView, TemplateView, View
 from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-import qrcode
-from qrcode.image.svg import SvgPathImage
-
 from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import (TOTPAuthenticateForm,
                                TOTPDeviceForm,
                                TOTPDeviceRemoveForm)
 from allauth_2fa import settings
-from allauth_2fa.utils import user_has_valid_totp_device
+from allauth_2fa.utils import generate_totp_config_svg, user_has_valid_totp_device
+
 
 class TwoFactorAuthenticate(FormView):
     template_name = 'allauth_2fa/authenticate.' + settings.TEMPLATE_EXTENSION
@@ -198,23 +194,9 @@ class QRCodeGeneratorView(LoginRequiredMixin, View):
             raise Http404()
 
         issuer = get_current_site(request).name
-        params = {
-            'secret': b32encode(device.bin_key).decode('utf-8'),
-            'algorithm': 'SHA1',
-            'digits': device.digits,
-            'period': device.step,
-        }
         label = '{issuer}: {username}'.format(
             issuer=issuer,
             username=request.user.get_username()
         )
-
-        otpauth_url = 'otpauth://totp/{label}?{query}'.format(
-            label=quote(label),
-            query=urlencode(params),
-        )
-
-        img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
-        response = HttpResponse(content_type='image/svg+xml; charset=utf-8')
-        img.save(response)
-        return response
+        svg_data = generate_totp_config_svg(device=device, issuer=issuer, label=label)
+        return HttpResponse(svg_data, content_type='image/svg+xml; charset=utf-8')
