@@ -1,5 +1,7 @@
 from base64 import b32encode
 
+from django.core.exceptions import ObjectDoesNotExist
+
 try:
     from urllib.parse import quote, urlencode
 except ImportError:
@@ -177,9 +179,12 @@ class TwoFactorBackupTokens(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorBackupTokens, self).get_context_data(*kwargs)
-        static_device, _ = self.request.user.staticdevice_set.get_or_create(
-            name='backup'
-        )
+        try:
+            static_device = self.request.user.staticdevice_set.get(
+                name=settings.BACKUP_DEVICE_NAME
+            )
+        except ObjectDoesNotExist:
+            static_device = None
 
         if static_device:
             context['backup_tokens'] = static_device.token_set.all()
@@ -188,7 +193,7 @@ class TwoFactorBackupTokens(TemplateView):
 
     def post(self, request, *args, **kwargs):
         static_device, _ = request.user.staticdevice_set.get_or_create(
-            name='backup'
+            name=settings.BACKUP_DEVICE_NAME
         )
         static_device.token_set.all().delete()
         for _ in range(3):
