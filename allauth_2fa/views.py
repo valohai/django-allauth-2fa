@@ -1,9 +1,9 @@
 from base64 import b64encode
 
-from allauth.account import signals
-from allauth.account.adapter import get_adapter
-from allauth.account.utils import get_login_redirect_url
-from django.contrib import messages
+import django_otp
+from allauth.account import app_settings as allauth_settings
+from allauth.account.utils import get_next_redirect_url
+from allauth.account.utils import perform_login
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
@@ -17,7 +17,6 @@ from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from allauth_2fa import app_settings
-from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import TOTPAuthenticateForm
 from allauth_2fa.forms import TOTPDeviceForm
 from allauth_2fa.forms import TOTPDeviceRemoveForm
@@ -29,6 +28,7 @@ from allauth_2fa.utils import user_has_valid_totp_device
 class TwoFactorAuthenticate(FormView):
     template_name = "allauth_2fa/authenticate." + app_settings.TEMPLATE_EXTENSION
     form_class = TOTPAuthenticateForm
+    redirect_field_name = "next"
 
     def dispatch(self, request, *args, **kwargs):
         # If the user is not about to enter their two-factor credentials,
@@ -46,41 +46,24 @@ class TwoFactorAuthenticate(FormView):
         kwargs["user"] = get_user_model().objects.get(id=user_id)
         return kwargs
 
+    def get_success_url(self):
+        # Filched from allauth's LoginView.
+        next_url = get_next_redirect_url(self.request, self.redirect_field_name)
+        return next_url or self.success_url
+
     def form_valid(self, form):
-        """
-        The allauth 2fa login flow is now done (the user logged in successfully
-        with 2FA), continue the logic from allauth.account.utils.perform_login
-        since it was interrupted earlier.
-
-        """
-        adapter = get_adapter(self.request)
-
-        # Skip over the (already done) 2fa login flow and continue the original
-        # allauth login flow.
-        super(OTPAdapter, adapter).login(self.request, form.user)
-
-        # Perform the rest of allauth.account.utils.perform_login, this is
-        # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
-
-        # TODO Support redirect_url.
-        response = HttpResponseRedirect(get_login_redirect_url(self.request))
-
-        # TODO Support signal_kwargs.
-        signals.user_logged_in.send(
-            sender=form.user.__class__,
-            request=self.request,
-            response=response,
-            user=form.user,
-        )
-
-        adapter.add_message(
+        # TOTPAuthenticateForm.clean_otp() will have set
+        # `form.user.otp_device`, so let's call login()
+        # to persist it in the session.
+        django_otp.login(self.request, form.user.otp_device)
+        # Continue performing the login. Since we now have persisted
+        # the OTP device, the adapter will allow continuation.
+        return perform_login(
             self.request,
-            messages.SUCCESS,
-            "account/messages/logged_in.txt",
-            {"user": form.user},
+            form.user,
+            email_verification=allauth_settings.EMAIL_VERIFICATION,
+            redirect_url=self.get_success_url(),
         )
-
-        return response
 
 
 class TwoFactorSetup(LoginRequiredMixin, FormView):
