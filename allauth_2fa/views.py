@@ -165,6 +165,7 @@ class TwoFactorRemove(FormView):
 
 class TwoFactorBackupTokens(TemplateView):
     template_name = 'allauth_2fa/backup_tokens.' + settings.TEMPLATE_EXTENSION
+    token_count = settings.BACKUP_TOKEN_COUNT
 
     def dispatch(self, request, *args, **kwargs):
         # TODO Once Django 1.9 is the minimum supported version, see if we can
@@ -196,7 +197,7 @@ class TwoFactorBackupTokens(TemplateView):
             name=settings.BACKUP_DEVICE_NAME
         )
         static_device.token_set.all().delete()
-        for _ in range(3):
+        for _ in range(self.token_count):
             static_device.token_set.create(token=StaticToken.random_token())
         return self.get(request, *args, **kwargs)
 
