@@ -19,7 +19,7 @@ class OTPAdapter(DefaultAccountAdapter):
 
     def login(self, request, user):
         # Require two-factor authentication if it has been configured.
-        if self.has_2fa_enabled(user):
+        if self.has_2fa_enabled(user) and not getattr(user, 'otp_device', None):
             request.session['allauth_2fa_user_id'] = user.id
 
             redirect_url = reverse('two-factor-authenticate')
