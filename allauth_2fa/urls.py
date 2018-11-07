@@ -2,7 +2,6 @@ from django.conf.urls import url
 
 from allauth_2fa import views
 
-
 urlpatterns = [
     url(r"^two-factor-authenticate/?$",
         views.TwoFactorAuthenticate.as_view(),

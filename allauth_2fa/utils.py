@@ -1,9 +1,14 @@
 from base64 import b32encode
-from urllib.parse import quote, urlencode
 
-import qrcode
 from django.utils.six import BytesIO
+import qrcode
 from qrcode.image.svg import SvgPathImage
+
+try:
+    from urllib.parse import quote, urlencode
+except ImportError:
+    from urllib import quote, urlencode
+
 
 
 def generate_totp_config_svg(device, issuer, label):

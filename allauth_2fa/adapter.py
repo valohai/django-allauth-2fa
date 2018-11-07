@@ -1,3 +1,8 @@
+from allauth.account.adapter import DefaultAccountAdapter
+from allauth.exceptions import ImmediateHttpResponse
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
 from allauth_2fa.utils import user_has_valid_totp_device
 
 try:
@@ -5,11 +10,7 @@ try:
 except ImportError:
     from urllib import urlencode
 
-from allauth.account.adapter import DefaultAccountAdapter
-from allauth.exceptions import ImmediateHttpResponse
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse
 
 
 class OTPAdapter(DefaultAccountAdapter):

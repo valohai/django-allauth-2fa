@@ -1,32 +1,33 @@
-import django_otp
+from allauth.account import app_settings
+from allauth.account.utils import get_next_redirect_url, perform_login
+from django.contrib.auth import get_user_model
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
+from django.views.generic import FormView, TemplateView, View
+import django_otp
+from django_otp.plugins.otp_static.models import StaticToken
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
+from allauth_2fa import settings
+from allauth_2fa.forms import (TOTPAuthenticateForm,
+                               TOTPDeviceForm,
+                               TOTPDeviceRemoveForm)
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
+from allauth_2fa.utils import (generate_totp_config_svg,
+                               user_has_valid_totp_device)
 
 try:
     from urllib.parse import quote, urlencode
 except ImportError:
     from urllib import quote, urlencode
 
-from allauth.account import app_settings
-from allauth.account.utils import perform_login, get_next_redirect_url
 
-from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.sites.shortcuts import get_current_site
-from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
-from django.views.generic import FormView, TemplateView, View
 
-from django_otp.plugins.otp_static.models import StaticToken
-from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from allauth_2fa.forms import (TOTPAuthenticateForm,
-                               TOTPDeviceForm,
-                               TOTPDeviceRemoveForm)
-from allauth_2fa import settings
-from allauth_2fa.utils import generate_totp_config_svg, user_has_valid_totp_device
 
 
 class TwoFactorAuthenticate(FormView):

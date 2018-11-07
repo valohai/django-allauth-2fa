@@ -1,5 +1,4 @@
 from allauth.account.adapter import get_adapter
-
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
