@@ -83,7 +83,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
         You can access anything on the request, but generally request.user will
         be most interesting here.
         """
-        raise NotImplemented('You must implement require_2fa.')
+        raise NotImplementedError('You must implement require_2fa.')
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # The user is not logged in, do nothing.
