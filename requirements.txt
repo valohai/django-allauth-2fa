@@ -14,8 +14,8 @@ ipython==5.1.0
 Werkzeug==0.11.11
 
 # Style checking.
-flake8==3.5.0
-flake8-import-order==0.16
+flake8==3.6.0
+flake8-import-order==0.18
 
 # For documentation.
 Sphinx==1.6.5
