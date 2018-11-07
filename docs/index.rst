@@ -6,6 +6,7 @@
 
     installation
     advanced
+    settings
     changelog
 
 
