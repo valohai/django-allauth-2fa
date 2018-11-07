@@ -38,3 +38,9 @@ def generate_totp_config_svg_for_device(request, device):
         username=request.user.get_username()
     )
     return generate_totp_config_svg(device=device, issuer=issuer, label=label)
+
+
+def user_has_valid_totp_device(user):
+    if not user.is_authenticated:
+        return False
+    return user.totpdevice_set.filter(confirmed=True).exists()
