@@ -107,7 +107,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         if the confirmation of the device fails.
         """
         self.request.user.totpdevice_set.filter(confirmed=False).delete()
-        TOTPDevice.objects.create(user=self.request.user, confirmed=False)
+        self.device = TOTPDevice.objects.create(user=self.request.user, confirmed=False)
 
     def get(self, request, *args, **kwargs):
         # Whenever this page is loaded, create a new device (this ensures a
