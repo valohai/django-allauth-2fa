@@ -179,7 +179,7 @@ class TwoFactorBackupTokens(TemplateView):
             return HttpResponseRedirect(reverse('two-factor-setup'))
 
     def get_context_data(self, **kwargs):
-        context = super(TwoFactorBackupTokens, self).get_context_data(*kwargs)
+        context = super(TwoFactorBackupTokens, self).get_context_data(**kwargs)
         try:
             static_device = self.request.user.staticdevice_set.get(
                 name=settings.BACKUP_DEVICE_NAME
