@@ -18,3 +18,12 @@ This can be used to allow a different template engine for 2FA views.
 Set the name for the static backup code OTP device.
 
 Defaults to ``backup``.
+
+
+``ALLAUTH_2FA_BACKUP_TOKEN_COUNT``
+----------------------------------
+
+The number of backup tokens to create in the built-in backup
+code view.
+
+Defaults to 3.
