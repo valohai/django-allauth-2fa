@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.sites.shortcuts import get_current_site
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
@@ -177,9 +178,12 @@ class TwoFactorBackupTokens(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorBackupTokens, self).get_context_data(*kwargs)
-        static_device, _ = self.request.user.staticdevice_set.get_or_create(
-            name='backup'
-        )
+        try:
+            static_device = self.request.user.staticdevice_set.get(
+                name=settings.BACKUP_DEVICE_NAME
+            )
+        except ObjectDoesNotExist:
+            static_device = None
 
         if static_device:
             context['backup_tokens'] = static_device.token_set.all()
@@ -188,7 +192,7 @@ class TwoFactorBackupTokens(TemplateView):
 
     def post(self, request, *args, **kwargs):
         static_device, _ = request.user.staticdevice_set.get_or_create(
-            name='backup'
+            name=settings.BACKUP_DEVICE_NAME
         )
         static_device.token_set.all().delete()
         for _ in range(3):

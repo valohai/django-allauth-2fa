@@ -1,8 +1,11 @@
 from django import forms
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
+
+from allauth_2fa import app_settings
 
 
 class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
@@ -62,9 +65,13 @@ class TOTPDeviceRemoveForm(forms.Form):
 
     def save(self):
         # Delete any backup tokens.
-        static_device = self.user.staticdevice_set.get(name='backup')
-        static_device.token_set.all().delete()
-        static_device.delete()
+        try:
+            static_device = self.user.staticdevice_set.get(name=app_settings.BACKUP_DEVICE_NAME)
+        except ObjectDoesNotExist:
+            pass
+        else:
+            static_device.token_set.all().delete()
+            static_device.delete()
 
         # Delete TOTP device.
         device = TOTPDevice.objects.get(user=self.user)
