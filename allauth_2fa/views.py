@@ -163,6 +163,9 @@ class TwoFactorRemove(FormView):
 
 class TwoFactorBackupTokens(TemplateView):
     template_name = 'allauth_2fa/backup_tokens.' + app_settings.TEMPLATE_EXTENSION
+    # This can be overridden in a subclass to True,
+    # to have that particular view always reveal the tokens.
+    reveal_tokens = bool(app_settings.ALWAYS_REVEAL_BACKUP_TOKENS)
 
     def dispatch(self, request, *args, **kwargs):
         # TODO Once Django 1.9 is the minimum supported version, see if we can
@@ -176,13 +179,14 @@ class TwoFactorBackupTokens(TemplateView):
             return HttpResponseRedirect(reverse('two-factor-setup'))
 
     def get_context_data(self, **kwargs):
-        context = super(TwoFactorBackupTokens, self).get_context_data(*kwargs)
+        context = super(TwoFactorBackupTokens, self).get_context_data(**kwargs)
         static_device, _ = self.request.user.staticdevice_set.get_or_create(
             name='backup'
         )
 
         if static_device:
             context['backup_tokens'] = static_device.token_set.all()
+            context['reveal_tokens'] = self.reveal_tokens
 
         return context
 
@@ -193,6 +197,7 @@ class TwoFactorBackupTokens(TemplateView):
         static_device.token_set.all().delete()
         for _ in range(3):
             static_device.token_set.create(token=StaticToken.random_token())
+        self.reveal_tokens = True
         return self.get(request, *args, **kwargs)
 
 
