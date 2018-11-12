@@ -11,8 +11,6 @@ except ImportError:
     from urllib import urlencode
 
 
-
-
 class OTPAdapter(DefaultAccountAdapter):
     def has_2fa_enabled(self, user):
         """Returns True if the user has 2FA configured."""

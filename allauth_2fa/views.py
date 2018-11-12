@@ -20,15 +20,6 @@ from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
 from allauth_2fa.utils import (generate_totp_config_svg,
                                user_has_valid_totp_device)
 
-try:
-    from urllib.parse import quote, urlencode
-except ImportError:
-    from urllib import quote, urlencode
-
-
-
-
-
 
 class TwoFactorAuthenticate(FormView):
     template_name = 'allauth_2fa/authenticate.' + settings.TEMPLATE_EXTENSION
@@ -57,7 +48,7 @@ class TwoFactorAuthenticate(FormView):
         return (
             get_next_redirect_url(
                 self.request,
-                self.redirect_field_name) or
+                self.redirect_field_name) or  # noqa
             self.success_url
         )
 

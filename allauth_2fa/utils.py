@@ -10,7 +10,6 @@ except ImportError:
     from urllib import quote, urlencode
 
 
-
 def generate_totp_config_svg(device, issuer, label):
     params = {
         'secret': b32encode(device.bin_key).decode('utf-8'),
@@ -32,7 +31,6 @@ def generate_totp_config_svg(device, issuer, label):
 
 
 def user_has_valid_totp_device(user):
-    return (
-        user.is_authenticated and
-        user.totpdevice_set.filter(confirmed=True).exists()
-    )
+    if not user.is_authenticated:
+        return False
+    return user.totpdevice_set.filter(confirmed=True).exists()
