@@ -5,8 +5,8 @@
     :caption: Contents:
 
     installation
+    configuration
     advanced
-    settings
     changelog
 
 

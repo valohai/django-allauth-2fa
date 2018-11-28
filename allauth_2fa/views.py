@@ -1,5 +1,4 @@
 from base64 import b32encode
-
 try:
     from urllib.parse import quote, urlencode
 except ImportError:
@@ -24,14 +23,15 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 import qrcode
 from qrcode.image.svg import SvgPathImage
 
+from allauth_2fa import app_settings
 from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import (TOTPAuthenticateForm,
                                TOTPDeviceForm,
                                TOTPDeviceRemoveForm)
-from allauth_2fa import settings
+
 
 class TwoFactorAuthenticate(FormView):
-    template_name = 'allauth_2fa/authenticate.' + settings.TEMPLATE_EXTENSION
+    template_name = 'allauth_2fa/authenticate.' + app_settings.TEMPLATE_EXTENSION
     form_class = TOTPAuthenticateForm
 
     def dispatch(self, request, *args, **kwargs):
@@ -87,7 +87,7 @@ class TwoFactorAuthenticate(FormView):
 
 
 class TwoFactorSetup(FormView):
-    template_name = 'allauth_2fa/setup.' + settings.TEMPLATE_EXTENSION
+    template_name = 'allauth_2fa/setup.' + app_settings.TEMPLATE_EXTENSION
     form_class = TOTPDeviceForm
     success_url = reverse_lazy('two-factor-backup-tokens')
 
@@ -136,7 +136,7 @@ class TwoFactorSetup(FormView):
 
 
 class TwoFactorRemove(FormView):
-    template_name = 'allauth_2fa/remove.' + settings.TEMPLATE_EXTENSION
+    template_name = 'allauth_2fa/remove.' + app_settings.TEMPLATE_EXTENSION
     form_class = TOTPDeviceRemoveForm
     success_url = reverse_lazy('two-factor-setup')
 
@@ -162,7 +162,7 @@ class TwoFactorRemove(FormView):
 
 
 class TwoFactorBackupTokens(TemplateView):
-    template_name = 'allauth_2fa/backup_tokens.' + settings.TEMPLATE_EXTENSION
+    template_name = 'allauth_2fa/backup_tokens.' + app_settings.TEMPLATE_EXTENSION
 
     def dispatch(self, request, *args, **kwargs):
         # TODO Once Django 1.9 is the minimum supported version, see if we can
