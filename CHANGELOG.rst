@@ -19,6 +19,8 @@ next
   views. Added in PR #73 by @akx.
 * Passing additional context to the ``TwoFactorBackupTokens`` was broken. This
   was fixed in PR #73 by @akx.
+* A configuration option (``ALLAUTH_2FA_ALWAYS_REVEAL_BACKUP_TOKENS``) was added
+  to only show the static tokens once (during creation)> PR #75 by @akx.
 
 0.6 February 13, 2018
 =====================
