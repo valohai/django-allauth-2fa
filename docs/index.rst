@@ -5,6 +5,7 @@
     :caption: Contents:
 
     installation
+    configuration
     advanced
     changelog
 
