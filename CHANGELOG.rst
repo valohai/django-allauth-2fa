@@ -8,6 +8,9 @@ next
 
 * Remove more code that was for Django < 1.11.
 * Officially support Django 2.0 and Django 2.1.
+* Do not include test code in distribution, fix from @akx, PR #67.
+* Support for more complex user IDs (e.g. UUIDs), fix from @chromakey, see issue
+  #64 / PR #66.
 
 0.6 February 13, 2018
 =====================
