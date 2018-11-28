@@ -11,6 +11,8 @@ next
 * Do not include test code in distribution, fix from @akx, PR #67.
 * Support for more complex user IDs (e.g. UUIDs), fix from @chromakey, see issue
   #64 / PR #66.
+* The extension used by the 2FA templates is customizable. Originally in PR #69
+  by @akx, split into PR #71.
 
 0.6 February 13, 2018
 =====================
