@@ -1,5 +1,6 @@
 from base64 import b32encode
 
+from django.contrib.sites.shortcuts import get_current_site
 from django.utils.six import BytesIO
 
 import qrcode
@@ -29,3 +30,13 @@ def generate_totp_config_svg(device, issuer, label):
     io = BytesIO()
     img.save(io)
     return io.getvalue()
+
+
+def generate_totp_config_svg_for_device(request, device):
+    issuer = get_current_site(request).name
+    label = '{issuer}: {username}'.format(
+        issuer=issuer,
+        username=request.user.get_username()
+    )
+    svg_data = generate_totp_config_svg(device=device, issuer=issuer, label=label)
+    return svg_data

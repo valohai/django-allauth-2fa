@@ -44,7 +44,6 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
 
         # URLs required to set up two-factor
         'two-factor-setup',
-        'two-factor-qr-code',
     ]
     # The message to the user if they don't have 2FA enabled and must enable it.
     require_2fa_message = "You must enable two-factor authentication before doing anything else."
