@@ -13,6 +13,8 @@ next
   #64 / PR #66.
 * The extension used by the 2FA templates is customizable. Originally in PR #69
   by @akx, split into PR #71.
+* The QR code is now included inline as an SVG instead of being a separate view.
+  PR #74 by @akx.
 
 0.6 February 13, 2018
 =====================
