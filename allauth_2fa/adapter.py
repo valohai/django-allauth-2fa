@@ -9,11 +9,13 @@ from allauth.exceptions import ImmediateHttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
+from allauth_2fa.utils import user_has_valid_totp_device
+
 
 class OTPAdapter(DefaultAccountAdapter):
     def has_2fa_enabled(self, user):
         """Returns True if the user has 2FA configured."""
-        return user.totpdevice_set.filter(confirmed=True).exists()
+        return user_has_valid_totp_device(user)
 
     def login(self, request, user):
         # Require two-factor authentication if it has been configured.

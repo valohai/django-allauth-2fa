@@ -15,6 +15,10 @@ next
   by @akx, split into PR #71.
 * The QR code is now included inline as an SVG instead of being a separate view.
   PR #74 by @akx.
+* A new mixin is included to enforce a user having 2FA enabled for particular
+  views. Added in PR #73 by @akx.
+* Passing additional context to the ``TwoFactorBackupTokens`` was broken. This
+  was fixed in PR #73 by @akx.
 
 0.6 February 13, 2018
 =====================
