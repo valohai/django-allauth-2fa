@@ -1,8 +1,4 @@
-from base64 import b32encode
-try:
-    from urllib.parse import quote, urlencode
-except ImportError:
-    from urllib import quote, urlencode
+from base64 import b64encode
 
 from allauth.account import signals
 from allauth.account.adapter import get_adapter
@@ -11,23 +7,20 @@ from allauth.account.utils import get_login_redirect_url
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
-from django.contrib.sites.shortcuts import get_current_site
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.views.generic import FormView, TemplateView, View
+from django.utils.encoding import force_text
+from django.views.generic import FormView, TemplateView
 
 from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-import qrcode
-from qrcode.image.svg import SvgPathImage
-
 from allauth_2fa import app_settings
 from allauth_2fa.adapter import OTPAdapter
-from allauth_2fa.forms import (TOTPAuthenticateForm,
-                               TOTPDeviceForm,
+from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
                                TOTPDeviceRemoveForm)
+from allauth_2fa.utils import generate_totp_config_svg_for_device
 
 
 class TwoFactorAuthenticate(FormView):
@@ -111,13 +104,22 @@ class TwoFactorSetup(FormView):
         if the confirmation of the device fails.
         """
         self.request.user.totpdevice_set.filter(confirmed=False).delete()
-        TOTPDevice.objects.create(user=self.request.user, confirmed=False)
+        self.device = TOTPDevice.objects.create(user=self.request.user, confirmed=False)
 
     def get(self, request, *args, **kwargs):
         # Whenever this page is loaded, create a new device (this ensures a
         # user's QR code isn't shown multiple times).
         self._new_device()
         return super(TwoFactorSetup, self).get(request, *args, **kwargs)
+
+    def get_qr_code_data_uri(self):
+        svg_data = generate_totp_config_svg_for_device(self.request, self.device)
+        return 'data:image/svg+xml;base64,%s' % force_text(b64encode(svg_data))
+
+    def get_context_data(self, **kwargs):
+        context = super(TwoFactorSetup, self).get_context_data(**kwargs)
+        context['qr_code_url'] = self.get_qr_code_data_uri()
+        return context
 
     def get_form_kwargs(self):
         kwargs = super(TwoFactorSetup, self).get_form_kwargs()
@@ -194,39 +196,3 @@ class TwoFactorBackupTokens(TemplateView):
         for _ in range(3):
             static_device.token_set.create(token=StaticToken.random_token())
         return self.get(request, *args, **kwargs)
-
-
-class QRCodeGeneratorView(View):
-    """Renders a QR code as an SVG for a particular user's device."""
-    http_method_names = ['get']
-
-    def get(self, request, *args, **kwargs):
-        # Anonymous users can't have a TOTP device configured.
-        if request.user.is_anonymous:
-            raise Http404()
-
-        device = request.user.totpdevice_set.filter(confirmed=False).first()
-
-        # If no device is configured, raise a 404.
-        if not device:
-            raise Http404()
-
-        secret_key = b32encode(device.bin_key).decode('utf-8')
-        issuer = get_current_site(request).name
-
-        otpauth_url = 'otpauth://totp/{label}?{query}'.format(
-            label=quote('{issuer}: {username}'.format(
-                issuer=issuer,
-                username=request.user.get_username()
-            )),
-            query=urlencode((
-                ('secret', secret_key),
-                ('digits', device.get_digits_display()),
-                ('issuer', issuer),
-            ))
-        )
-
-        img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
-        response = HttpResponse(content_type='image/svg+xml; charset=utf-8')
-        img.save(response)
-        return response

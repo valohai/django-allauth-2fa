@@ -1,9 +1,11 @@
+import warnings
+
 from allauth.account.adapter import get_adapter
 
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.urls import resolve, reverse
+from django.urls import NoReverseMatch, resolve, reverse
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -44,7 +46,6 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
 
         # URLs required to set up two-factor
         'two-factor-setup',
-        'two-factor-qr-code',
     ]
     # The message to the user if they don't have 2FA enabled and must enable it.
     require_2fa_message = "You must enable two-factor authentication before doing anything else."
@@ -95,8 +96,14 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
             return
 
         # If the user is on one of the allowed pages, do nothing.
-        if request.path in map(reverse, self.allowed_pages):
-            return
+        for urlname in self.allowed_pages:
+            try:
+                if request.path == reverse(urlname):
+                    return
+            except NoReverseMatch:
+                # The developer may have misconfigured the list of allowed pages.
+                # Let's not outright crash at that point, but inform the developer about their mishap.
+                warnings.warn('NoReverseMatch for %s while checking for pages allowed without 2FA' % urlname)
 
         # User already has two-factor configured, do nothing.
         if get_adapter(request).has_2fa_enabled(request.user):
