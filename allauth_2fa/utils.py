@@ -1,15 +1,14 @@
 from base64 import b32encode
+try:
+    from urllib.parse import quote, urlencode
+except ImportError:
+    from urllib import quote, urlencode
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.six import BytesIO
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
-
-try:
-    from urllib.parse import quote, urlencode
-except ImportError:
-    from urllib import quote, urlencode
 
 
 def generate_totp_config_svg(device, issuer, label):
@@ -38,5 +37,4 @@ def generate_totp_config_svg_for_device(request, device):
         issuer=issuer,
         username=request.user.get_username()
     )
-    svg_data = generate_totp_config_svg(device=device, issuer=issuer, label=label)
-    return svg_data
+    return generate_totp_config_svg(device=device, issuer=issuer, label=label)

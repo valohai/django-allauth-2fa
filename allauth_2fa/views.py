@@ -3,6 +3,7 @@ from base64 import b64encode
 from allauth.account import signals
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import get_login_redirect_url
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
@@ -11,6 +12,7 @@ from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.encoding import force_text
 from django.views.generic import FormView, TemplateView
+
 from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
