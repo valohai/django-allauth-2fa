@@ -150,6 +150,9 @@ class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
 
 class TwoFactorBackupTokens(ValidTOTPDeviceRequiredMixin, TemplateView):
     template_name = 'allauth_2fa/backup_tokens.' + app_settings.TEMPLATE_EXTENSION
+    # This can be overridden in a subclass to True,
+    # to have that particular view always reveal the tokens.
+    reveal_tokens = bool(app_settings.ALWAYS_REVEAL_BACKUP_TOKENS)
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorBackupTokens, self).get_context_data(**kwargs)
@@ -159,6 +162,7 @@ class TwoFactorBackupTokens(ValidTOTPDeviceRequiredMixin, TemplateView):
 
         if static_device:
             context['backup_tokens'] = static_device.token_set.all()
+            context['reveal_tokens'] = self.reveal_tokens
 
         return context
 
@@ -169,4 +173,5 @@ class TwoFactorBackupTokens(ValidTOTPDeviceRequiredMixin, TemplateView):
         static_device.token_set.all().delete()
         for _ in range(3):
             static_device.token_set.create(token=StaticToken.random_token())
+        self.reveal_tokens = True
         return self.get(request, *args, **kwargs)
