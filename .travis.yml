@@ -13,6 +13,10 @@ notifications:
 install:
   - pip install coveralls tox
 
+matrix:
+  allow_failures:
+    - env: TOX_SKIP_ENV=".*django[^m].*"
+
 script:
   - tox
 
