@@ -5,7 +5,7 @@ except ImportError:
     from urllib import quote, urlencode
 
 from django.contrib.sites.shortcuts import get_current_site
-from django.utils.six import BytesIO
+from six import BytesIO
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
