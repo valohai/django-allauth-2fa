@@ -6,6 +6,7 @@ django>=1.11
 django-allauth==0.26.1
 django-otp==0.4.1
 qrcode==5.3
+six==1.13.0
 
 # Nice for development.
 django-extensions==1.7.4
