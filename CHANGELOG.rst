@@ -6,6 +6,11 @@ Changelog
 next
 ====
 
+* Drop support for Python 2.7 and Python 3.4.
+* Officially support Python 3.7 and 3.8.
+* Drop support for Django 2.0 and Django 2.1.
+* Officially support Django 3.0.
+
 0.7 September 10, 2019
 ======================
 
