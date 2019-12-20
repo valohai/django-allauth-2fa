@@ -20,7 +20,6 @@ setup(
         "qrcode>=5.3",
         "django-allauth>=0.25",
         "django-otp>=0.3.12",
-        "six==1.13.0",
     ],
     author="Víðir Valberg Guðmundsson",
     author_email="valberg@orn.li",

@@ -1,15 +1,11 @@
 from base64 import b32encode
-try:
-    from urllib.parse import quote, urlencode
-except ImportError:
-    from urllib import quote, urlencode
+from io import BytesIO
+from urllib.parse import quote, urlencode
 
 from django.contrib.sites.shortcuts import get_current_site
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
-
-from six import BytesIO
 
 
 def generate_totp_config_svg(device, issuer, label):
