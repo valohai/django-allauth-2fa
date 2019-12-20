@@ -1,9 +1,9 @@
 dist: xenial
 language: python
 python:
+  - 3.8
   - 3.7
   - 3.6
-  - 2.7
 
 env:
   - TOX_SKIP_ENV=".*djangomaster.*"
@@ -21,9 +21,6 @@ install:
   - pip install coveralls tox
 
 matrix:
-  exclude:
-    - python: 2.7
-      env: TOX_SKIP_ENV=".*django[^m].*"
   allow_failures:
     - env: TOX_SKIP_ENV=".*django[^m].*"
 
