@@ -15,6 +15,7 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
         self.fields['otp_token'].widget.attrs.update({
             'autofocus': 'autofocus',
             'autocomplete': 'off',
+            'inputmode': 'numeric',
         })
         self.user = user
 
