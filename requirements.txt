@@ -2,11 +2,6 @@
 # for installing the package and running unit tests are defined in setup.py.
 -e .
 
-django>=1.11
-django-allauth==0.26.1
-django-otp==0.4.1
-qrcode==5.3
-
 # Nice for development.
 django-extensions==1.7.4
 ipdb==0.10.1
