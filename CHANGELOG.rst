@@ -3,8 +3,8 @@
 Changelog
 #########
 
-next
-====
+0.8 February 3, 2020
+====================
 
 * Drop support for Python 2.7 and Python 3.4.
 * Officially support Python 3.7 and 3.8.
