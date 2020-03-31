@@ -3,6 +3,14 @@
 Changelog
 #########
 
+next
+====
+
+* Improves documentation for protection Django admin with 2FA. Contributed by
+  @hailkomputer in #91.
+* Autocomplete on the token entry form is disabled. Contributed by @qvicksilver
+  in #95.
+
 0.8 February 3, 2020
 ====================
 
