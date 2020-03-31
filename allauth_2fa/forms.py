@@ -31,7 +31,10 @@ class TOTPDeviceForm(forms.Form):
 
     def __init__(self, user, metadata=None, **kwargs):
         super(TOTPDeviceForm, self).__init__(**kwargs)
-        self.fields['token'].widget.attrs.update({'autofocus': 'autofocus'})
+        self.fields['token'].widget.attrs.update({
+            'autofocus': 'autofocus',
+            'autocomplete': 'off',
+        })
         self.user = user
         self.metadata = metadata or {}
 
