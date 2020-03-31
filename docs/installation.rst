@@ -89,16 +89,18 @@ Finally, you must include the django-allauth-2fa URLs:
     site includes an additional login view (usually available at
     ``/admin/login``).
 
-    The easiest way to fix this is to wrap it in ``login_required`` decorator
+    The easiest way to fix this is to wrap it in ``staff_member_required`` decorator
+    and disallow access to the admin site to all, except logged in staff members 
+    through allauth workflow.
     (the code only works if you use the standard admin site, if you have a
     custom admin site you'll need to customize this more):
 
     .. code-block:: python
 
         from django.contrib import admin
-        from django.contrib.auth.decorators import login_required
+        from django.contrib.admin.views.decorators import staff_member_required
 
         # Ensure users go through the allauth workflow when logging into admin.
-        admin.site.login = login_required(admin.site.login)
+        admin.site.login = staff_member_required(admin.site.login, login_url='/accounts/login')
         # Run the standard admin set-up.
         admin.autodiscover()
