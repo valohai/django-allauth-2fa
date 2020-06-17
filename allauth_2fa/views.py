@@ -17,7 +17,6 @@ from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from allauth_2fa import app_settings
-from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
                                TOTPDeviceRemoveForm)
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
@@ -56,7 +55,7 @@ class TwoFactorAuthenticate(FormView):
 
         # Skip over the (already done) 2fa login flow and continue the original
         # allauth login flow.
-        super(OTPAdapter, adapter).login(self.request, form.user)
+        super(adapter.__class__, adapter).login(self.request, form.user)
 
         # Perform the rest of allauth.account.utils.perform_login, this is
         # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
