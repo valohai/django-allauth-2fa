@@ -149,14 +149,14 @@ class Test2Factor(TestCase):
         user.totpdevice_set.create()
 
         # Add a next to unnamed-view.
-        resp = self.client.post(reverse('account_login') + '?next=unnamed-view',
+        resp = self.client.post(reverse('account_login') + '?existing=param&next=unnamed-view',
                                 {'login': 'john',
                                  'password': 'doe'}, follow=True)
 
         # Ensure that the unnamed-view is still being forwarded to.
         self.assertRedirects(
             resp,
-            reverse('two-factor-authenticate') + '?next=unnamed-view',
+            reverse('two-factor-authenticate') + '?existing=param&next=unnamed-view',
             fetch_redirect_response=False)
 
     def test_2fa_login_forwarding_next_via_post(self):
@@ -170,15 +170,15 @@ class Test2Factor(TestCase):
         user.totpdevice_set.create()
 
         # Add a next to unnamed-view.
-        resp = self.client.post(reverse('account_login'),
+        resp = self.client.post(reverse('account_login') + '?existing=param',
                                 {'login': 'john',
                                  'password': 'doe',
                                  'next': 'unnamed-view'}, follow=True)
 
-        # Ensure that the unnamed-view is still being forwarded to.
+        # Ensure that the unnamed-view is still being forwarded to, preserving existing query params.
         self.assertRedirects(
             resp,
-            reverse('two-factor-authenticate') + '?next=unnamed-view',
+            reverse('two-factor-authenticate') + '?existing=param&next=unnamed-view',
             fetch_redirect_response=False)
 
     def test_anonymous(self):

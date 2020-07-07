@@ -26,9 +26,11 @@ class OTPAdapter(DefaultAccountAdapter):
             view = request.resolver_match.func.view_class()
             view.request = request
             success_url = view.get_success_url()
+            query_params = request.GET.copy()
             if success_url:
-                next_dict = {view.redirect_field_name: success_url}
-                redirect_url += u'?' + urlencode(next_dict)
+                query_params[view.redirect_field_name] = success_url
+            if query_params:
+                redirect_url += u'?' + urlencode(query_params)
 
             raise ImmediateHttpResponse(
                 response=HttpResponseRedirect(redirect_url)
