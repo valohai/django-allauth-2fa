@@ -1,3 +1,7 @@
+from urllib.parse import (
+    parse_qsl, urlencode, urlparse, urlunparse
+)
+
 from allauth.account.signals import user_logged_in
 
 from django.conf import settings
@@ -8,6 +12,14 @@ from django.urls import reverse
 from django_otp.oath import TOTP
 
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
+
+
+def normalize_url(url):
+    """Sort the URL's query string parameters."""
+    url = str(url)  # Coerce reverse_lazy() URLs.
+    scheme, netloc, path, params, query, fragment = urlparse(url)
+    query_parts = sorted(parse_qsl(query))
+    return urlunparse((scheme, netloc, path, params, urlencode(query_parts), fragment))
 
 
 class Test2Factor(TestCase):
@@ -154,9 +166,10 @@ class Test2Factor(TestCase):
                                  'password': 'doe'}, follow=True)
 
         # Ensure that the unnamed-view is still being forwarded to.
+        resp.redirect_chain[-1] = (normalize_url(resp.redirect_chain[-1][0]), resp.redirect_chain[-1][1])
         self.assertRedirects(
             resp,
-            reverse('two-factor-authenticate') + '?existing=param&next=unnamed-view',
+            normalize_url(reverse('two-factor-authenticate') + '?existing=param&next=unnamed-view'),
             fetch_redirect_response=False)
 
     def test_2fa_login_forwarding_next_via_post(self):
@@ -176,9 +189,10 @@ class Test2Factor(TestCase):
                                  'next': 'unnamed-view'}, follow=True)
 
         # Ensure that the unnamed-view is still being forwarded to, preserving existing query params.
+        resp.redirect_chain[-1] = (normalize_url(resp.redirect_chain[-1][0]), resp.redirect_chain[-1][1])
         self.assertRedirects(
             resp,
-            reverse('two-factor-authenticate') + '?existing=param&next=unnamed-view',
+            normalize_url(reverse('two-factor-authenticate') + '?existing=param&next=unnamed-view'),
             fetch_redirect_response=False)
 
     def test_anonymous(self):
