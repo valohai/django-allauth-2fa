@@ -10,6 +10,8 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
         label=_("Token"),
     )
 
+    otp_device = forms.CharField(required=False)
+
     def __init__(self, user, **kwargs):
         super(TOTPAuthenticateForm, self).__init__(**kwargs)
         self.fields['otp_token'].widget.attrs.update({
