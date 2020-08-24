@@ -1,5 +1,6 @@
 from base64 import b64encode
 
+from allauth.exceptions import ImmediateHttpResponse
 from allauth.account import signals
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import get_login_redirect_url
