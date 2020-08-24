@@ -26,9 +26,11 @@ class OTPAdapter(DefaultAccountAdapter):
             if request.GET:
                 redirect_url += u'?' + urlencode(request.GET)
 
-            raise ImmediateHttpResponse(
-                response=HttpResponseRedirect(redirect_url)
-            )
+                raise ImmediateHttpResponse(
+                    response=HttpResponseRedirect(redirect_url)
+                )
+            else:
+                return super(OTPAdapter, self).login(request, user)
 
         # Otherwise defer to the original allauth adapter.
         return super(OTPAdapter, self).login(request, user)
