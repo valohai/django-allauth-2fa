@@ -58,27 +58,28 @@ class TwoFactorAuthenticate(FormView):
             # Skip over the (already done) 2fa login flow and continue the original
             # allauth login flow.
             super(adapter.__class__, adapter).login(self.request, form.user)
-
-            # Perform the rest of allauth.account.utils.perform_login, this is
-            # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
-
-            # TODO Support redirect_url.
-            response = HttpResponseRedirect(
-                get_login_redirect_url(self.request))
-
-            # TODO Support signal_kwargs.
-            signals.user_logged_in.send(sender=form.user.__class__,
-                                        request=self.request,
-                                        response=response,
-                                        user=form.user)
-
-            adapter.add_message(
-                self.request,
-                messages.SUCCESS,
-                'account/messages/logged_in.txt',
-                {'user': form.user})
         except ImmediateHttpResponse as e:
-            response = e.response
+            pass
+        
+        # Perform the rest of allauth.account.utils.perform_login, this is
+        # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
+
+        # TODO Support redirect_url.
+        response = HttpResponseRedirect(
+            get_login_redirect_url(self.request))
+
+        # TODO Support signal_kwargs.
+        signals.user_logged_in.send(sender=form.user.__class__,
+                                    request=self.request,
+                                    response=response,
+                                    user=form.user)
+
+        adapter.add_message(
+            self.request,
+            messages.SUCCESS,
+            'account/messages/logged_in.txt',
+            {'user': form.user})
+
         return response
 
 
