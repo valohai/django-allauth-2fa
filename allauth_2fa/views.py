@@ -4,7 +4,6 @@ from allauth.exceptions import ImmediateHttpResponse
 from allauth.account import signals
 from allauth.account.adapter import get_adapter
 from allauth.account.utils import get_login_redirect_url
-from allauth.account.auth_backends import AuthenticationBackend
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login as django_login
@@ -58,8 +57,8 @@ class TwoFactorAuthenticate(FormView):
         # Skip over the (already done) 2fa login flow and continue the original
         # allauth login flow.
         #super(adapter.__class__, adapter).login(self.request, form.user)
-        form.user.backend = AuthenticationBackend
-        django_login(self.request, form.user)
+        django_login(self.request, form.user, 
+                     backend='allauth.account.auth_backends.AuthenticationBackend')
 
         # Perform the rest of allauth.account.utils.perform_login, this is
         # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
