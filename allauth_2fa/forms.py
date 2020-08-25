@@ -22,7 +22,7 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
         self.user = user
 
     def clean(self):
-        # enables throttling
+        # providing user's device enables throttling in django-otp
         self.cleaned_data['otp_device'] = TOTPDevice.objects.get(user=self.user).persistent_id
         self.clean_otp(self.user)
         return self.cleaned_data

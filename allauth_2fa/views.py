@@ -57,6 +57,7 @@ class TwoFactorAuthenticate(FormView):
         # Skip over the (already done) 2fa login flow and continue the original
         # allauth login flow.
         #super(adapter.__class__, adapter).login(self.request, form.user)
+        # allauth login flow broken, explicitly use django_login with allauth backend instead
         django_login(self.request, form.user, 
                      backend='allauth.account.auth_backends.AuthenticationBackend')
 
