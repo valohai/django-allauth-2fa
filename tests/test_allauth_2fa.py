@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from django_otp.oath import TOTP
 
+from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
 
@@ -329,4 +330,50 @@ class TestRequire2FAMiddleware(TestCase):
         # The user is redirected to the 2FA setup page.
         self.assertRedirects(resp,
                              reverse('two-factor-setup'),
+                             fetch_redirect_response=False)
+
+
+class TestAdapter(OTPAdapter):
+    pass
+
+
+@override_settings(
+    # Add the subclassed adapter.
+    ACCOUNT_ADAPTER='tests.test_allauth_2fa.TestAdapter'
+)
+class TestSubclassedAdapter(TestCase):
+    def test_normal_login(self):
+        """Test login behavior when 2FA is not configured."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'})
+        self.assertRedirects(resp,
+                             settings.LOGIN_REDIRECT_URL,
+                             fetch_redirect_response=False)
+
+    def test_2fa_login(self):
+        """Test login behavior when 2FA is configured."""
+        user = get_user_model().objects.create(username='john')
+        user.set_password('doe')
+        user.save()
+        totp_model = user.totpdevice_set.create()
+
+        resp = self.client.post(reverse('account_login'),
+                                {'login': 'john',
+                                 'password': 'doe'})
+        self.assertRedirects(resp,
+                             reverse('two-factor-authenticate'),
+                             fetch_redirect_response=False)
+
+        # Now ensure that logging in actually works.
+        totp = TOTP(totp_model.bin_key, totp_model.step, totp_model.t0, totp_model.digits)
+        resp = self.client.post(reverse('two-factor-authenticate'),
+                                {'otp_token': totp.token()})
+        # The user ends up on the normal redirect login page.
+        self.assertRedirects(resp,
+                             settings.LOGIN_REDIRECT_URL,
                              fetch_redirect_response=False)
