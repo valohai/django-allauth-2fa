@@ -30,7 +30,7 @@ class OTPAdapter(DefaultAccountAdapter):
             if success_url:
                 query_params[view.redirect_field_name] = success_url
             if query_params:
-                redirect_url += u'?' + urlencode(query_params)
+                redirect_url += '?' + urlencode(query_params)
 
             raise ImmediateHttpResponse(
                 response=HttpResponseRedirect(redirect_url)
