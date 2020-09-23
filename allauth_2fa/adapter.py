@@ -22,9 +22,15 @@ class OTPAdapter(DefaultAccountAdapter):
             request.session['allauth_2fa_user_id'] = str(user.id)
 
             redirect_url = reverse('two-factor-authenticate')
-            # Add GET parameters to the URL if they exist.
-            if request.GET:
-                redirect_url += u'?' + urlencode(request.GET)
+            # Add "next" parameter to the URL.
+            view = request.resolver_match.func.view_class()
+            view.request = request
+            success_url = view.get_success_url()
+            query_params = request.GET.copy()
+            if success_url:
+                query_params[view.redirect_field_name] = success_url
+            if query_params:
+                redirect_url += '?' + urlencode(query_params)
 
             raise ImmediateHttpResponse(
                 response=HttpResponseRedirect(redirect_url)
