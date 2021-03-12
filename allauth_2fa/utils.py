@@ -17,10 +17,7 @@ def generate_totp_config_svg(device, issuer, label):
         'issuer': issuer,
     }
 
-    otpauth_url = 'otpauth://totp/{label}?{query}'.format(
-        label=quote(label),
-        query=urlencode(params),
-    )
+    otpauth_url = f'otpauth://totp/{quote(label)}?{urlencode(params)}'
 
     img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
     io = BytesIO()
@@ -30,10 +27,7 @@ def generate_totp_config_svg(device, issuer, label):
 
 def generate_totp_config_svg_for_device(request, device):
     issuer = get_current_site(request).name
-    label = '{issuer}: {username}'.format(
-        issuer=issuer,
-        username=request.user.get_username()
-    )
+    label = f'{issuer}: {request.user.get_username()}'
     return generate_totp_config_svg(device=device, issuer=issuer, label=label)
 
 

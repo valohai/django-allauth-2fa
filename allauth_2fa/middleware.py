@@ -103,7 +103,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
             except NoReverseMatch:
                 # The developer may have misconfigured the list of allowed pages.
                 # Let's not outright crash at that point, but inform the developer about their mishap.
-                warnings.warn('NoReverseMatch for %s while checking for pages allowed without 2FA' % urlname)
+                warnings.warn(f'NoReverseMatch for {urlname} while checking for pages allowed without 2FA')
 
         # User already has two-factor configured, do nothing.
         if get_adapter(request).has_2fa_enabled(request.user):

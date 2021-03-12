@@ -13,7 +13,7 @@ class ValidTOTPDeviceRequiredMixin(AccessMixin):
             return self.handle_no_permission()
         if not user_has_valid_totp_device(request.user):
             return self.handle_missing_totp_device()
-        return super(ValidTOTPDeviceRequiredMixin, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def handle_missing_totp_device(self):
         return HttpResponseRedirect(self.no_valid_totp_device_url)
