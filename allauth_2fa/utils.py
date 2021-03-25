@@ -7,7 +7,7 @@ from django.contrib.sites.shortcuts import get_current_site
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
-from allauth_2fa.app_settings import CODE_EXPIRY_MINUTES
+from allauth_2fa import app_settings
 
 
 QRCODE_CACHE = {}
@@ -15,7 +15,7 @@ QRCODE_CACHE = {}
 
 def qr_code_expired():
     last_access = QRCODE_CACHE.get('time')
-    if last_access and datetime.now() - timedelta(minutes=CODE_EXPIRY_MINUTES) > last_access:
+    if last_access and datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > last_access:
         return True
     else:
         return False
