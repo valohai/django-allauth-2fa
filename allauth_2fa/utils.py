@@ -1,11 +1,33 @@
 from base64 import b32encode
 from io import BytesIO
 from urllib.parse import quote, urlencode
+from datetime import datetime, timedelta
 
 from django.contrib.sites.shortcuts import get_current_site
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
+from app_settings import CODE_EXPIRY_MINUTES
+
+
+QRCODE_CACHE = {}
+
+
+def qr_code_expired():
+    last_access = QRCODE_CACHE.get('time')
+    if last_access and datetime.now() - timedelta(minutes=CODE_EXPIRY_MINUTES) > last_access:
+        return True
+    else:
+        return False
+
+
+def cache_qr_code(code):
+    QRCODE_CACHE['code'] = code
+    QRCODE_CACHE['time'] = datetime.now()
+
+
+def get_cached_qr_code():
+    return QRCODE_CACHE.get('code')
 
 
 def generate_totp_config_svg(device, issuer, label):

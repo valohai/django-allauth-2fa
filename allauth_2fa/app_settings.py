@@ -7,3 +7,5 @@ TEMPLATE_EXTENSION = getattr(settings,
                              allauth_settings.TEMPLATE_EXTENSION)
 
 ALWAYS_REVEAL_BACKUP_TOKENS = bool(getattr(settings, 'ALLAUTH_2FA_ALWAYS_REVEAL_BACKUP_TOKENS', True))
+
+CODE_EXPIRY_MINUTES = 15

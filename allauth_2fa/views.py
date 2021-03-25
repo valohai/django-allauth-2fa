@@ -21,7 +21,10 @@ from allauth_2fa import app_settings
 from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
                                TOTPDeviceRemoveForm)
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
-from allauth_2fa.utils import generate_totp_config_svg_for_device, user_has_valid_totp_device
+from allauth_2fa.utils import (
+    generate_totp_config_svg_for_device, user_has_valid_totp_device,
+    qr_code_expired, cache_qr_code, get_cached_qr_code
+)
 
 
 class TwoFactorAuthenticate(FormView):
@@ -114,6 +117,15 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
     def get_qr_code_data_uri(self):
         svg_data = generate_totp_config_svg_for_device(self.request, self.device)
         return 'data:image/svg+xml;base64,%s' % force_text(b64encode(svg_data))
+
+    def get_qr_code(self):
+        if qr_code_expired():
+            # generate new code & cache it
+            code = self.get_qr_code_data_uri()
+            cache_qr_code(code)
+            return code
+        else:
+            return get_cached_qr_code()
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorSetup, self).get_context_data(**kwargs)
