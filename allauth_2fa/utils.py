@@ -7,7 +7,7 @@ from django.contrib.sites.shortcuts import get_current_site
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
-from app_settings import CODE_EXPIRY_MINUTES
+from allauth_2fa.app_settings import CODE_EXPIRY_MINUTES
 
 
 QRCODE_CACHE = {}
