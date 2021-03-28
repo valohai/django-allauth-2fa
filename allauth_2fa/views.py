@@ -120,7 +120,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
 
     def get_qr_code(self):
         if qr_code_expired():
-            # generate new code & cache it
+            # generate new code, cache & return it
             code = self.get_qr_code_data_uri()
             cache_qr_code(code)
             return code
@@ -129,7 +129,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorSetup, self).get_context_data(**kwargs)
-        context['qr_code_url'] = self.get_qr_code_data_uri()
+        context['qr_code_url'] = self.get_qr_code()
         return context
 
     def get_form_kwargs(self):
