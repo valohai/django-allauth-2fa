@@ -14,8 +14,8 @@ QRCODE_CACHE = {}
 
 
 def qr_code_expired():
-    last_access = QRCODE_CACHE.get('time')
-    if last_access and datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > last_access:
+    if 'code' not in QRCODE_CACHE or 'time' not in QRCODE_CACHE \
+            or datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > QRCODE_CACHE.get('time'):
         return True
     else:
         return False
