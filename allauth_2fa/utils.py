@@ -16,7 +16,7 @@ ATTEMPTS_CACHE = {}
 def reset_device(user_id):
     reset = False
     if user_id in ATTEMPTS_CACHE:
-        if datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > ATTEMPTS_CACHE['user_id']:
+        if datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > ATTEMPTS_CACHE[user_id]:
             reset = True
         del ATTEMPTS_CACHE[user_id]
     ATTEMPTS_CACHE[user_id] = datetime.now()
