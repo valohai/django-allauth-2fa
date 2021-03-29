@@ -117,7 +117,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
     def get(self, request, *args, **kwargs):
         # Whenever this page is loaded, create a new device (this ensures a
         # user's QR code isn't shown multiple times).
-        self._new_device(request.user.pk)
+        self._new_device()
         return super(TwoFactorSetup, self).get(request, *args, **kwargs)
 
     def get_qr_code_data_uri(self):
