@@ -110,6 +110,9 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
             # reset device
             self.request.user.totpdevice_set.filter(confirmed=False).delete()
             self.device = TOTPDevice.objects.create(user=self.request.user, confirmed=False)
+        else:
+            # set device to current
+            self.device = self.request.user.totpdevice_set.filter(confirmed=False).first()
 
     def get(self, request, *args, **kwargs):
         # Whenever this page is loaded, create a new device (this ensures a
