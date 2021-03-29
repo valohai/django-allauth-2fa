@@ -23,7 +23,7 @@ from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
 from allauth_2fa.utils import (
     generate_totp_config_svg_for_device, user_has_valid_totp_device,
-    qr_code_expired, cache_qr_code, get_cached_qr_code
+    reset_device
 )
 
 
@@ -102,30 +102,24 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         """
         Replace any unconfirmed TOTPDevices with a new one for confirmation.
 
-        This needs to be done whenever a GET request to the page is received OR
-        if the confirmation of the device fails.
+        This needs to be done whenever a new user makes a GET request or when
+        the CODE_EXPIRY_MINUTES has surpassed since the last attempt
         """
-        self.request.user.totpdevice_set.filter(confirmed=False).delete()
-        self.device = TOTPDevice.objects.create(user=self.request.user, confirmed=False)
+        device_set = self.request.user.totpdevice_set.filter(confirmed=False)
+        if not device_set.exists() or reset_device(self.request.user.pk):
+            # reset device
+            self.request.user.totpdevice_set.filter(confirmed=False).delete()
+            self.device = TOTPDevice.objects.create(user=self.request.user, confirmed=False)
 
     def get(self, request, *args, **kwargs):
         # Whenever this page is loaded, create a new device (this ensures a
         # user's QR code isn't shown multiple times).
-        self._new_device()
+        self._new_device(request.user.pk)
         return super(TwoFactorSetup, self).get(request, *args, **kwargs)
 
     def get_qr_code_data_uri(self):
         svg_data = generate_totp_config_svg_for_device(self.request, self.device)
         return 'data:image/svg+xml;base64,%s' % force_text(b64encode(svg_data))
-
-    def get_qr_code(self):
-        if qr_code_expired():
-            # generate new code, cache & return it
-            code = self.get_qr_code_data_uri()
-            cache_qr_code(code)
-            return code
-        else:
-            return get_cached_qr_code()
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorSetup, self).get_context_data(**kwargs)

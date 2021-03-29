@@ -10,24 +10,17 @@ from qrcode.image.svg import SvgPathImage
 from allauth_2fa import app_settings
 
 
-QRCODE_CACHE = {}
+ATTEMPTS_CACHE = {}
 
 
-def qr_code_expired():
-    if 'code' not in QRCODE_CACHE or 'time' not in QRCODE_CACHE \
-            or datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > QRCODE_CACHE.get('time'):
-        return True
-    else:
-        return False
-
-
-def cache_qr_code(code):
-    QRCODE_CACHE['code'] = code
-    QRCODE_CACHE['time'] = datetime.now()
-
-
-def get_cached_qr_code():
-    return QRCODE_CACHE.get('code')
+def reset_device(user_id):
+    reset = False
+    if user_id in ATTEMPTS_CACHE:
+        if datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > ATTEMPTS_CACHE['user_id']:
+            reset = True
+        del ATTEMPTS_CACHE[user_id]
+    ATTEMPTS_CACHE[user_id] = datetime.now()
+    return reset
 
 
 def generate_totp_config_svg(device, issuer, label):
