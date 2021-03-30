@@ -26,19 +26,6 @@ def reset_device(user_id):
     return reset
 
 
-def minutes_to_expire(user_id):
-    """
-    Returns time to device resets in minutes
-    """
-    if user_id not in ATTEMPTS_CACHE:
-        return app_settings.CODE_EXPIRY_MINUTES
-    else:
-        expiry_minutes_ago = datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES)
-        last_attempt = ATTEMPTS_CACHE[user_id]
-        return app_settings.CODE_EXPIRY_MINUTES if last_attempt < expiry_minutes_ago \
-            else (datetime.now() - last_attempt).minute
-
-
 def generate_totp_config_svg(device, issuer, label):
     params = {
         'secret': b32encode(device.bin_key).decode('utf-8'),
