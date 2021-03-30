@@ -22,6 +22,7 @@ from allauth_2fa.forms import TOTPDeviceForm
 from allauth_2fa.forms import TOTPDeviceRemoveForm
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
 from allauth_2fa.utils import generate_totp_config_svg_for_device
+from allauth_2fa.utils import get_device_base32_secret
 from allauth_2fa.utils import user_has_valid_totp_device
 
 
@@ -117,6 +118,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["qr_code_url"] = self.get_qr_code_data_uri()
+        context["secret"] = get_device_base32_secret(self.device)
         return context
 
     def get_form_kwargs(self):
