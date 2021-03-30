@@ -23,7 +23,7 @@ from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
 from allauth_2fa.utils import (
     generate_totp_config_svg_for_device, user_has_valid_totp_device,
-    reset_device
+    reset_device, minutes_to_expire
 )
 
 
@@ -103,7 +103,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         Replace any unconfirmed TOTPDevices with a new one for confirmation.
 
         This needs to be done whenever a new user makes a GET request or when
-        the CODE_EXPIRY_MINUTES has surpassed since the last attempt
+        the CODE_EXPIRY_MINUTES has surpassed since the last attempt.
         """
         device_set = self.request.user.totpdevice_set.filter(confirmed=False)
         if not device_set.exists() or reset_device(self.request.user.pk):
@@ -127,6 +127,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super(TwoFactorSetup, self).get_context_data(**kwargs)
         context['qr_code_url'] = self.get_qr_code_data_uri()
+        context['minutes_to_expire'] = minutes_to_expire(self.request.user.pk)
         return context
 
     def get_form_kwargs(self):
