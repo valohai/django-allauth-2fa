@@ -102,8 +102,8 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         """
         Replace any unconfirmed TOTPDevices with a new one for confirmation.
 
-        This needs to be done whenever a new user makes a GET request or when
-        the CODE_EXPIRY_MINUTES has surpassed since the last attempt
+        This is done if the user has not made a GET request or failed confirm
+        within CODE_EXPIRY_MINUTES.
         """
         device_set = self.request.user.totpdevice_set.filter(confirmed=False)
         if not device_set.exists() or reset_device(self.request.user.pk):
@@ -127,6 +127,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super(TwoFactorSetup, self).get_context_data(**kwargs)
         context['qr_code_url'] = self.get_qr_code_data_uri()
+        context['minutes_to_expire'] = app_settings.CODE_EXPIRY_MINUTES
         return context
 
     def get_form_kwargs(self):

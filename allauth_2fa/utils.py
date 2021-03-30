@@ -14,6 +14,9 @@ ATTEMPTS_CACHE = {}
 
 
 def reset_device(user_id):
+    """
+    Returns if device has expired and updates cache
+    """
     reset = False
     if user_id in ATTEMPTS_CACHE:
         if datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > ATTEMPTS_CACHE[user_id]:
