@@ -136,12 +136,13 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        # Confirm the device.
-        form.save()
+        # Create new device if necessary
+        self._new_device()
+        form.sa124ve()
         return super(TwoFactorSetup, self).form_valid(form)
 
     def form_invalid(self, form):
-        # If the confirmation code was wrong, generate a new device.
+        # Create new device if necessary
         self._new_device()
         return super(TwoFactorSetup, self).form_invalid(form)
 
