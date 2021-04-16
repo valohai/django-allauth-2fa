@@ -19,11 +19,15 @@ def reset_device(user_id):
     """
     reset = False
     if user_id in ATTEMPTS_CACHE:
-        if datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > ATTEMPTS_CACHE[user_id]:
+        if code_has_expired(user_id):
             reset = True
         del ATTEMPTS_CACHE[user_id]
     ATTEMPTS_CACHE[user_id] = datetime.now()
     return reset
+
+
+def code_has_expired(user_id):
+    return datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > ATTEMPTS_CACHE[user_id]
 
 
 def generate_totp_config_svg(device, issuer, label):
