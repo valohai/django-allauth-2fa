@@ -138,7 +138,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         # Create new device if necessary
         self._new_device()
-        form.sa124ve()
+        form.save()
         return super(TwoFactorSetup, self).form_valid(form)
 
     def form_invalid(self, form):
