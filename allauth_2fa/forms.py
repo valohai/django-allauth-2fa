@@ -75,5 +75,8 @@ class TOTPDeviceRemoveForm(forms.Form):
         static_device.delete()
 
         # Delete TOTP device.
-        device = TOTPDevice.objects.get(user=self.user)
-        device.delete()
+        try:
+            device = TOTPDevice.objects.get(user=self.user)
+            device.delete()
+        except TOTPDevice.MultipleObjectsReturned:
+            TOTPDevice.objects.filter(user=self.user).delete()

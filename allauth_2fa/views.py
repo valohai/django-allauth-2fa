@@ -100,7 +100,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
 
     def _new_device(self):
         """
-        Replace any unconfirmed TOTPDevices with a new one for confirmation.
+        Replace all TOTPDevices with a new one for confirmation.
 
         This is done if the user has not made a GET request or failed confirm
         within CODE_EXPIRY_MINUTES.
@@ -108,7 +108,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         device_set = self.request.user.totpdevice_set.filter(confirmed=False)
         if not device_set.exists() or reset_device(self.request.user.pk):
             # reset device
-            self.request.user.totpdevice_set.filter(confirmed=False).delete()
+            self.request.user.totpdevice_set.all().delete()
             self.device = TOTPDevice.objects.create(user=self.request.user, confirmed=False)
         else:
             # set device to current
