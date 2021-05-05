@@ -141,6 +141,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
             form.save()
             return super(TwoFactorSetup, self).form_valid(form)
         else:
+            form.token.errors.append('The previous QR code expired, scan the new code above')
             return self.form_invalid(form)
 
     def form_invalid(self, form):
