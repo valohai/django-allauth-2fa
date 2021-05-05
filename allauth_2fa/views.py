@@ -115,8 +115,8 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
             self.device = self.request.user.totpdevice_set.filter(confirmed=False).first()
 
     def get(self, request, *args, **kwargs):
-        # Whenever this page is loaded, create a new device (this ensures a
-        # user's QR code isn't shown multiple times).
+        # Whenever this page is loaded, create a new device if previous
+        # has expired.
         self._new_device()
         return super(TwoFactorSetup, self).get(request, *args, **kwargs)
 
