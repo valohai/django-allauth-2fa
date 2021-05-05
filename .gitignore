@@ -12,6 +12,7 @@ django_allauth_2fa.egg-info/
 
 # Testing
 .coverage
+htmlcov
 .tox
 
 # Docs
