@@ -28,6 +28,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
       - uses: actions/checkout@v2
       - run: pip install -U pip wheel setuptools
-      - run: pip install -U coveralls tox tox-gh-actions
+      - run: pip install -U tox tox-gh-actions
       - run: tox
-      #- run: coveralls
+      - uses: codecov/codecov-action@v1
