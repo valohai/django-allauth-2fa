@@ -23,7 +23,7 @@ from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
 from allauth_2fa.utils import (
     generate_totp_config_svg_for_device, user_has_valid_totp_device,
-    reset_device
+    reset_device, code_has_expired
 )
 
 
@@ -136,12 +136,8 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        # Create new device if necessary
-        if not reset_device(self.request.user.pk):
-            form.save()
-            return super(TwoFactorSetup, self).form_valid(form)
-        else:
-            return self.form_invalid(form)
+        form.save()
+        return super(TwoFactorSetup, self).form_valid(form)
 
     def form_invalid(self, form):
         # Create new device if necessary
