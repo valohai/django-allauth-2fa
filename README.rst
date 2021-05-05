@@ -1,8 +1,8 @@
 Welcome to django-allauth-2fa!
 ==============================
 
-.. image:: https://travis-ci.org/percipient/django-allauth-2fa.svg?branch=master
-    :target: https://travis-ci.org/percipient/django-allauth-2fa
+.. image:: https://github.com/valohai/django-allauth-2fa/actions/workflows/ci.yml/badge.svg
+    :target: https://github.com/valohai/django-allauth-2fa/actions/workflows/ci.yml
 
 .. image:: https://coveralls.io/repos/github/percipient/django-allauth-2fa/badge.svg?branch=master
     :target: https://coveralls.io/github/percipient/django-allauth-2fa?branch=master
