@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from allauth_2fa.utils import code_has_expired
+from allauth_2fa.utils import reset_device
 
 
 class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
@@ -49,7 +49,7 @@ class TOTPDeviceForm(forms.Form):
 
         # Find the unconfirmed device and attempt to verify the token.
         self.device = self.user.totpdevice_set.filter(confirmed=False).first()
-        if code_has_expired(self.user.id):
+        if reset_device(self.user.id):
             raise forms.ValidationError(_('The previous QR code expired, scan the new code above'))
         if not self.device.verify_token(token):
             raise forms.ValidationError(_('The entered token is not valid'))
