@@ -23,7 +23,7 @@ from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
 from allauth_2fa.utils import (
     generate_totp_config_svg_for_device, user_has_valid_totp_device,
-    reset_device, code_has_expired
+    reset_device
 )
 
 
