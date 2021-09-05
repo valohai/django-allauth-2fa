@@ -6,7 +6,7 @@ from allauth.exceptions import ImmediateHttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from allauth_2fa.utils import user_has_valid_totp_device
+from allauth_2fa.utils import sanitize_session, user_has_valid_totp_device
 
 
 class OTPAdapter(DefaultAccountAdapter):
@@ -15,6 +15,8 @@ class OTPAdapter(DefaultAccountAdapter):
         return user_has_valid_totp_device(user)
 
     def login(self, request, user):
+        # Clean previous half-logins
+        sanitize_session(request)
         # Require two-factor authentication if it has been configured.
         if self.has_2fa_enabled(user):
             # Cast to string for the case when this is not a JSON serializable
@@ -35,6 +37,7 @@ class OTPAdapter(DefaultAccountAdapter):
             raise ImmediateHttpResponse(
                 response=HttpResponseRedirect(redirect_url)
             )
+            
 
         # Otherwise defer to the original allauth adapter.
         return super(OTPAdapter, self).login(request, user)

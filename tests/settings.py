@@ -66,9 +66,6 @@ MIDDLEWARE = (
 
     # Configure the django-otp package.
     'django_otp.middleware.OTPMiddleware',
-
-    # Reset login flow middleware.
-    'allauth_2fa.middleware.AllauthTwoFactorMiddleware',
 )
 
 if django.VERSION < (2,):

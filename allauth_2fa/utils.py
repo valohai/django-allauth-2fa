@@ -8,6 +8,16 @@ import qrcode
 from qrcode.image.svg import SvgPathImage
 
 
+def sanitize_session(request):
+    """
+    If present, remove artifact from previous half-login,
+    or successful login.
+    """
+    try:
+        del request.session['allauth_2fa_user_id']
+    except KeyError:
+        pass
+
 def generate_totp_config_svg(device, issuer, label):
     params = {
         'secret': b32encode(device.bin_key).decode('utf-8'),

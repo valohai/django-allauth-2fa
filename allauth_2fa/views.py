@@ -20,7 +20,7 @@ from allauth_2fa import app_settings
 from allauth_2fa.forms import (TOTPAuthenticateForm, TOTPDeviceForm,
                                TOTPDeviceRemoveForm)
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
-from allauth_2fa.utils import generate_totp_config_svg_for_device, user_has_valid_totp_device
+from allauth_2fa.utils import generate_totp_config_svg_for_device, sanitize_session, user_has_valid_totp_device
 
 
 class TwoFactorAuthenticate(FormView):
@@ -75,7 +75,7 @@ class TwoFactorAuthenticate(FormView):
             messages.SUCCESS,
             'account/messages/logged_in.txt',
             {'user': form.user})
-
+        sanitize_session(self.request)
         return response
 
 
