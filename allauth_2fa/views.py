@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.views.generic import FormView, TemplateView
 
 from django_otp.plugins.otp_static.models import StaticToken
@@ -109,7 +109,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
 
     def get_qr_code_data_uri(self):
         svg_data = generate_totp_config_svg_for_device(self.request, self.device)
-        return 'data:image/svg+xml;base64,%s' % force_text(b64encode(svg_data))
+        return 'data:image/svg+xml;base64,%s' % force_str(b64encode(svg_data))
 
     def get_context_data(self, **kwargs):
         context = super(TwoFactorSetup, self).get_context_data(**kwargs)
