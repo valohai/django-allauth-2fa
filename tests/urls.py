@@ -12,5 +12,5 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
 
     # A view without a name.
-    path("unnamed-view$", blank_view),
+    path("unnamed-view", blank_view),
 ]
