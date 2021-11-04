@@ -47,11 +47,6 @@ Django   django-allauth django-otp     Python
 4.0b1    0.41.0         0.9, 1.0, 1.1  3.8, 3.9
 ======== ============== ============== ==================
 
-* Django 2.2
-* django-allauth 0.41.0
-* django-otp 0.3.12
-* Python 3.6
-
 Contributing
 ------------
 
