@@ -37,4 +37,4 @@ class OTPAdapter(DefaultAccountAdapter):
             )
 
         # Otherwise defer to the original allauth adapter.
-        return super(OTPAdapter, self).login(request, user)
+        return super().login(request, user)

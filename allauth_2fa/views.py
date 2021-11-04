@@ -35,11 +35,10 @@ class TwoFactorAuthenticate(FormView):
             # Don't use the redirect_to_login here since we don't actually want
             # to include the next parameter.
             return redirect('account_login')
-        return super(TwoFactorAuthenticate, self).dispatch(request, *args,
-                                                           **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
-        kwargs = super(TwoFactorAuthenticate, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         user_id = self.request.session['allauth_2fa_user_id']
         kwargs['user'] = get_user_model().objects.get(id=user_id)
         return kwargs
@@ -89,7 +88,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         if user_has_valid_totp_device(request.user):
             return HttpResponseRedirect(reverse('two-factor-backup-tokens'))
 
-        return super(TwoFactorSetup, self).dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def _new_device(self):
         """
@@ -105,31 +104,31 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         # Whenever this page is loaded, create a new device (this ensures a
         # user's QR code isn't shown multiple times).
         self._new_device()
-        return super(TwoFactorSetup, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_qr_code_data_uri(self):
         svg_data = generate_totp_config_svg_for_device(self.request, self.device)
-        return 'data:image/svg+xml;base64,%s' % force_text(b64encode(svg_data))
+        return f'data:image/svg+xml;base64,{force_text(b64encode(svg_data))}'
 
     def get_context_data(self, **kwargs):
-        context = super(TwoFactorSetup, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['qr_code_url'] = self.get_qr_code_data_uri()
         return context
 
     def get_form_kwargs(self):
-        kwargs = super(TwoFactorSetup, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
         # Confirm the device.
         form.save()
-        return super(TwoFactorSetup, self).form_valid(form)
+        return super().form_valid(form)
 
     def form_invalid(self, form):
         # If the confirmation code was wrong, generate a new device.
         self._new_device()
-        return super(TwoFactorSetup, self).form_invalid(form)
+        return super().form_invalid(form)
 
 
 class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
@@ -139,10 +138,10 @@ class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
 
     def form_valid(self, form):
         form.save()
-        return super(TwoFactorRemove, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_form_kwargs(self):
-        kwargs = super(TwoFactorRemove, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
@@ -154,7 +153,7 @@ class TwoFactorBackupTokens(ValidTOTPDeviceRequiredMixin, TemplateView):
     reveal_tokens = bool(app_settings.ALWAYS_REVEAL_BACKUP_TOKENS)
 
     def get_context_data(self, **kwargs):
-        context = super(TwoFactorBackupTokens, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         static_device, _ = self.request.user.staticdevice_set.get_or_create(
             name='backup'
         )

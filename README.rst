@@ -40,7 +40,7 @@ below:
 * Django 1.11
 * django-allauth 0.25.0
 * django-otp 0.3.12
-* Python 3.5
+* Python 3.6
 
 Contributing
 ------------
