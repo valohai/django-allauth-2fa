@@ -37,8 +37,8 @@ django-allauth-2fa attempts to maintain compatibility with supported versions of
 Django, django-allauth, and django-otp. Current minimum versions are listed
 below:
 
-* Django 1.11
-* django-allauth 0.25.0
+* Django 2.2
+* django-allauth 0.41.0
 * django-otp 0.3.12
 * Python 3.6
 
