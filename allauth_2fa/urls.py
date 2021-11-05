@@ -9,7 +9,9 @@ urlpatterns = [
         name="two-factor-authenticate",
     ),
     re_path(
-        r"^two_factor/setup/?$", views.TwoFactorSetup.as_view(), name="two-factor-setup",
+        r"^two_factor/setup/?$",
+        views.TwoFactorSetup.as_view(),
+        name="two-factor-setup",
     ),
     re_path(
         r"^two_factor/backup_tokens/?$",
