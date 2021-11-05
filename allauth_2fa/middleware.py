@@ -1,11 +1,12 @@
 import warnings
 
 from allauth.account.adapter import get_adapter
-
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.urls import NoReverseMatch, resolve, reverse
+from django.urls import NoReverseMatch
+from django.urls import resolve
+from django.urls import reverse
 from django.utils.deprecation import MiddlewareMixin
 
 
@@ -21,9 +22,10 @@ class AllauthTwoFactorMiddleware(MiddlewareMixin):
     def process_request(self, request):
         match = resolve(request.path)
         if not match.url_name or not match.url_name.startswith(
-                'two-factor-authenticate'):
+            "two-factor-authenticate"
+        ):
             try:
-                del request.session['allauth_2fa_user_id']
+                del request.session["allauth_2fa_user_id"]
             except KeyError:
                 pass
 
@@ -40,15 +42,16 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
     # List of URL names that the user should still be allowed to access.
     allowed_pages = [
         # They should still be able to log out or change password.
-        'account_change_password',
-        'account_logout',
-        'account_reset_password',
-
+        "account_change_password",
+        "account_logout",
+        "account_reset_password",
         # URLs required to set up two-factor
-        'two-factor-setup',
+        "two-factor-setup",
     ]
     # The message to the user if they don't have 2FA enabled and must enable it.
-    require_2fa_message = "You must enable two-factor authentication before doing anything else."
+    require_2fa_message = (
+        "You must enable two-factor authentication before doing anything else."
+    )
 
     def on_require_2fa(self, request):
         """
@@ -57,11 +60,11 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
         middleware.
         """
         # See allauth.account.adapter.DefaultAccountAdapter.add_message.
-        if 'django.contrib.messages' in settings.INSTALLED_APPS:
+        if "django.contrib.messages" in settings.INSTALLED_APPS:
             # If there is already a pending message related to two-factor (likely
             # created by a redirect view), simply update the message text.
             storage = messages.get_messages(request)
-            tag = '2fa_required'
+            tag = "2fa_required"
             for m in storage:
                 if m.extra_tags == tag:
                     m.message = self.require_2fa_message
@@ -73,18 +76,18 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
             storage.used = False
 
         # Redirect user to two-factor setup page.
-        return redirect('two-factor-setup')
+        return redirect("two-factor-setup")
 
     def require_2fa(self, request):
         """
         Check if this request is required to have 2FA before accessing the app.
 
-        This should return True if this request requires 2FA. (Note that the user was already)
+        This should return True if this request requires 2FA.
 
         You can access anything on the request, but generally request.user will
         be most interesting here.
         """
-        raise NotImplementedError('You must implement require_2fa.')
+        raise NotImplementedError("You must implement require_2fa.")
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # The user is not logged in, do nothing.
@@ -102,8 +105,12 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
                     return
             except NoReverseMatch:
                 # The developer may have misconfigured the list of allowed pages.
-                # Let's not outright crash at that point, but inform the developer about their mishap.
-                warnings.warn(f'NoReverseMatch for {urlname} while checking for pages allowed without 2FA')
+                # Let's not outright crash at that point, but inform the developer
+                # about their mishap.
+                warnings.warn(
+                    f"NoReverseMatch for {urlname} while checking for pages allowed "
+                    f"without 2FA"
+                )
 
         # User already has two-factor configured, do nothing.
         if get_adapter(request).has_2fa_enabled(request.user):

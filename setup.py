@@ -1,17 +1,18 @@
 import codecs
 
-from setuptools import find_packages, setup
+from setuptools import find_packages
+from setuptools import setup
 
 
 def long_description():
-    with codecs.open('README.rst', encoding='utf8') as f:
+    with codecs.open("README.rst", encoding="utf8") as f:
         return f.read()
 
 
 setup(
     name="django-allauth-2fa",
     version="0.8",
-    packages=find_packages('.', include=('allauth_2fa', 'allauth_2fa.*')),
+    packages=find_packages(".", include=("allauth_2fa", "allauth_2fa.*")),
     include_package_data=True,
     install_requires=[
         "django>=2.2",
@@ -23,7 +24,7 @@ setup(
     author_email="valberg@orn.li",
     description="Adds two factor authentication to django-allauth",
     license="Apache 2.0",
-    keywords=['otp', 'auth', 'two factor authentication', 'allauth', 'django', '2fa'],
+    keywords=["otp", "auth", "two factor authentication", "allauth", "django", "2fa"],
     url="https://github.com/percipient/django-allauth-2fa",
     long_description=long_description(),
     classifiers=[
