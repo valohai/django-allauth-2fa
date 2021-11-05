@@ -1,21 +1,21 @@
-from django.conf.urls import url
+from django.urls import re_path
 
 from allauth_2fa import views
 
 urlpatterns = [
-    url(r"^two-factor-authenticate/?$",
+    re_path("^two-factor-authenticate/?",
         views.TwoFactorAuthenticate.as_view(),
         name="two-factor-authenticate"),
 
-    url(r"^two_factor/setup/?$",
+    re_path("^two_factor/setup/?",
         views.TwoFactorSetup.as_view(),
         name="two-factor-setup"),
 
-    url(r"^two_factor/backup_tokens/?$",
+    re_path("^two_factor/backup_tokens/?",
         views.TwoFactorBackupTokens.as_view(),
         name="two-factor-backup-tokens"),
 
-    url(r"^two_factor/remove/?$",
+    re_path("^two_factor/remove/?",
         views.TwoFactorRemove.as_view(),
         name="two-factor-remove"),
 ]
