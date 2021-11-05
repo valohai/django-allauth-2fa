@@ -14,10 +14,10 @@ setup(
     packages=find_packages('.', include=('allauth_2fa', 'allauth_2fa.*')),
     include_package_data=True,
     install_requires=[
-        "django>=1.11",
+        "django>=2.2",
         "qrcode>=5.3",
-        "django-allauth>=0.25",
-        "django-otp>=0.3.12",
+        "django-allauth>=0.41.0",
+        "django-otp>=0.5.0",
     ],
     author="Víðir Valberg Guðmundsson",
     author_email="valberg@orn.li",
