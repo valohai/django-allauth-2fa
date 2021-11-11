@@ -4,7 +4,7 @@ Configuration
 ``ALLAUTH_2FA_TEMPLATE_EXTENSION``
 ----------------------------------
 
-ALlows you to override the extension for the templates used by the internal
+Allows you to override the extension for the templates used by the internal
 views of django-allauth-2fa.
 
 Defaults to ``ACCOUNT_TEMPLATE_EXTENSION`` from allauth, which is ``html`` by
