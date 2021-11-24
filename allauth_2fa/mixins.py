@@ -6,7 +6,7 @@ from allauth_2fa.utils import user_has_valid_totp_device
 
 
 class ValidTOTPDeviceRequiredMixin(AccessMixin):
-    no_valid_totp_device_url = reverse_lazy('two-factor-setup')
+    no_valid_totp_device_url = reverse_lazy("two-factor-setup")
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:

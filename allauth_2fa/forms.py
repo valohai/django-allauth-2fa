@@ -1,6 +1,5 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
-
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
@@ -12,11 +11,13 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
 
     def __init__(self, user, **kwargs):
         super().__init__(**kwargs)
-        self.fields['otp_token'].widget.attrs.update({
-            'autofocus': 'autofocus',
-            'autocomplete': 'off',
-            'inputmode': 'numeric',
-        })
+        self.fields["otp_token"].widget.attrs.update(
+            {
+                "autofocus": "autofocus",
+                "autocomplete": "off",
+                "inputmode": "numeric",
+            }
+        )
         self.user = user
 
     def clean(self):
@@ -31,20 +32,22 @@ class TOTPDeviceForm(forms.Form):
 
     def __init__(self, user, metadata=None, **kwargs):
         super().__init__(**kwargs)
-        self.fields['token'].widget.attrs.update({
-            'autofocus': 'autofocus',
-            'autocomplete': 'off',
-        })
+        self.fields["token"].widget.attrs.update(
+            {
+                "autofocus": "autofocus",
+                "autocomplete": "off",
+            }
+        )
         self.user = user
         self.metadata = metadata or {}
 
     def clean_token(self):
-        token = self.cleaned_data.get('token')
+        token = self.cleaned_data.get("token")
 
         # Find the unconfirmed device and attempt to verify the token.
         self.device = self.user.totpdevice_set.filter(confirmed=False).first()
         if not self.device.verify_token(token):
-            raise forms.ValidationError(_('The entered token is not valid'))
+            raise forms.ValidationError(_("The entered token is not valid"))
 
         return token
 
@@ -59,14 +62,13 @@ class TOTPDeviceForm(forms.Form):
 
 
 class TOTPDeviceRemoveForm(forms.Form):
-
     def __init__(self, user, **kwargs):
         super().__init__(**kwargs)
         self.user = user
 
     def save(self):
         # Delete any backup tokens.
-        static_device = self.user.staticdevice_set.get(name='backup')
+        static_device = self.user.staticdevice_set.get(name="backup")
         static_device.token_set.all().delete()
         static_device.delete()
 

@@ -10,7 +10,6 @@ Werkzeug==0.16.1
 
 # Style checking.
 flake8==3.7.9
-flake8-import-order==0.18.1
 
 # For documentation.
 Sphinx==1.6.5

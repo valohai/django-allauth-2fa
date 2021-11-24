@@ -2,7 +2,6 @@ from urllib.parse import urlencode
 
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.exceptions import ImmediateHttpResponse
-
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
@@ -19,9 +18,9 @@ class OTPAdapter(DefaultAccountAdapter):
         if self.has_2fa_enabled(user):
             # Cast to string for the case when this is not a JSON serializable
             # object, e.g. a UUID.
-            request.session['allauth_2fa_user_id'] = str(user.id)
+            request.session["allauth_2fa_user_id"] = str(user.id)
 
-            redirect_url = reverse('two-factor-authenticate')
+            redirect_url = reverse("two-factor-authenticate")
             # Add "next" parameter to the URL.
             view = request.resolver_match.func.view_class()
             view.request = request
@@ -30,11 +29,9 @@ class OTPAdapter(DefaultAccountAdapter):
             if success_url:
                 query_params[view.redirect_field_name] = success_url
             if query_params:
-                redirect_url += '?' + urlencode(query_params)
+                redirect_url += "?" + urlencode(query_params)
 
-            raise ImmediateHttpResponse(
-                response=HttpResponseRedirect(redirect_url)
-            )
+            raise ImmediateHttpResponse(response=HttpResponseRedirect(redirect_url))
 
         # Otherwise defer to the original allauth adapter.
         return super().login(request, user)

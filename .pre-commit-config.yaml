@@ -1,0 +1,40 @@
+default_language_version:
+  python: python3
+repos:
+  - repo: https://github.com/psf/black
+    rev: 21.10b0
+    hooks:
+      - id: black
+  - repo: git://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-ast
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: fix-encoding-pragma
+        args: ["--remove"]
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        additional_dependencies: ["flake8-bugbear"]
+        args: [--max-line-length=88]
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v2.6.0
+    hooks:
+      - id: reorder-python-imports
+        args:
+          - --py3-plus
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.29.0
+    hooks:
+      - id: pyupgrade
+        args:
+          - --py36-plus
+        exclude: migrations/
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.4.0
+    hooks:
+      - id: django-upgrade
+        args:
+          - --target-version=3.2
