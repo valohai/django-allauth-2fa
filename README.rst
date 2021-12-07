@@ -4,8 +4,8 @@ Welcome to django-allauth-2fa!
 .. image:: https://github.com/valohai/django-allauth-2fa/actions/workflows/ci.yml/badge.svg
     :target: https://github.com/valohai/django-allauth-2fa/actions/workflows/ci.yml
 
-.. image:: https://coveralls.io/repos/github/percipient/django-allauth-2fa/badge.svg?branch=master
-    :target: https://coveralls.io/github/percipient/django-allauth-2fa?branch=master
+.. image:: https://coveralls.io/repos/github/valohai/django-allauth-2fa/badge.svg?branch=main
+    :target: https://coveralls.io/github/valohai/django-allauth-2fa?branch=main
 
 .. image:: https://readthedocs.org/projects/django-allauth-2fa/badge/?version=latest
     :target: https://django-allauth-2fa.readthedocs.io/
@@ -61,7 +61,7 @@ django-allauth-2fa useful!
 #. If you feel uncomfortable or uncertain about an issue or your changes,
    feel free to email support@percipientnetworks.com and we will happily help you.
 #. Fork `the repository`_ on GitHub to start making your changes to the
-   **master** branch (or branch off of it).
+   **main** branch (or branch off of it).
 #. Write a test which shows that the bug was fixed or that the feature
    works as expected.
 #. Send a pull request and bug the maintainer until it gets merged and
