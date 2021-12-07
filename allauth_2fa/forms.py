@@ -1,4 +1,7 @@
+import contextlib
+
 from django import forms
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
@@ -67,10 +70,11 @@ class TOTPDeviceRemoveForm(forms.Form):
         self.user = user
 
     def save(self):
-        # Delete any backup tokens.
-        static_device = self.user.staticdevice_set.get(name="backup")
-        static_device.token_set.all().delete()
-        static_device.delete()
+        with contextlib.suppress(ObjectDoesNotExist):
+            # Delete any backup tokens and their related static device.
+            static_device = self.user.staticdevice_set.get(name="backup")
+            static_device.token_set.all().delete()
+            static_device.delete()
 
         # Delete TOTP device.
         device = TOTPDevice.objects.get(user=self.user)

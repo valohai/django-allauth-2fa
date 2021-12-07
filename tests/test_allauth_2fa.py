@@ -166,6 +166,26 @@ def test_2fa_reset_flow(client, john_with_totp, target_url):
     assertRedirects(resp, LOGIN_URL, fetch_redirect_response=False)
 
 
+def test_2fa_removal(client, john_with_totp):
+    """Removing 2FA should be possible."""
+    user, totp_device = john_with_totp
+    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
+    do_totp_authentication(
+        client,
+        totp_device=totp_device,
+        expected_redirect_url=settings.LOGIN_REDIRECT_URL,
+    )
+    assert user.totpdevice_set.exists()
+
+    # Navigate to 2FA removal view
+    client.get(reverse("two-factor-remove"))
+
+    # ... and POST to confirm
+    client.post(reverse("two-factor-remove"))
+
+    assert not user.totpdevice_set.exists()
+
+
 @pytest.mark.parametrize("next_via", ["get", "post"])
 def test_2fa_login_forwarding_get_parameters(client, john_with_totp, next_via: str):
     """
