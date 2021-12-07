@@ -70,11 +70,12 @@ django-allauth-2fa useful!
 Running tests
 '''''''''''''
 
-Tests can be run using the standard Django testing facility:
+Tests can be run using [pytest](https://docs.pytest.org/en/6.2.x/).
 
 .. code-block:: bash
 
-    python manage.py test
+    pip install -r requirements-test.txt
+    py.test
 
 Running the test project
 ''''''''''''''''''''''''
