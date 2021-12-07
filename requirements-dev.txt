@@ -1,5 +1,5 @@
 # Dependencies required for installing the package are defined in setup.cfg.
-# Running unit tests should require no extra dependencies.
+# Dependencies for tests are in requirements-test.txt.
 
 -e .  # Install the current directory as an editable package.
 

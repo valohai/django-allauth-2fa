@@ -68,6 +68,7 @@ if django.VERSION < (2,):
     MIDDLEWARE += ("django.contrib.auth.middleware.SessionAuthenticationMiddleware",)
 
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
+PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 
 # Enable two-factor auth.
 ACCOUNT_ADAPTER = "allauth_2fa.adapter.OTPAdapter"
