@@ -120,6 +120,11 @@ def test_invalid_2fa_login(client, john_with_totp):
     resp = client.post(TWO_FACTOR_AUTH_URL, {"otp_token": "invalid"})
     assert resp.status_code == 200
 
+    # Check the user did not get logged in
+    url = reverse("login-required-view")
+    resp = client.get(url)
+    assertRedirects(resp, f"{LOGIN_URL}?next={url}")
+
 
 def test_2fa_redirect(client, john):
     """
