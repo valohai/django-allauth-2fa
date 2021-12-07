@@ -7,7 +7,13 @@ on:
     branches:
       - main
 jobs:
-  Build:
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: pre-commit/action@v2.0.3
+  Test:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -31,3 +37,16 @@ jobs:
       - run: pip install -U tox tox-gh-actions
       - run: tox
       - uses: codecov/codecov-action@v1
+  Build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - uses: actions/checkout@v2
+      - run: pip install -U build
+      - run: python -m build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist/
