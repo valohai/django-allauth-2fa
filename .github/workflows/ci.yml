@@ -36,7 +36,12 @@ jobs:
       - run: pip install -U pip wheel setuptools
       - run: pip install -U tox tox-gh-actions
       - run: tox
-      - uses: codecov/codecov-action@v1
+      - run: |
+          mkdir /tmp/coverage
+          find .tox -type f -name 'coverage*xml' -exec mv '{}' /tmp/coverage ';'
+      - uses: codecov/codecov-action@v2
+        with:
+          directory: /tmp/coverage
   Build:
     runs-on: ubuntu-20.04
     steps:
