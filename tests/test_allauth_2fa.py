@@ -1,324 +1,244 @@
-from urllib.parse import parse_qsl
-from urllib.parse import urlencode
-from urllib.parse import urlparse
-from urllib.parse import urlunparse
+from typing import Callable
+from typing import Optional
+from typing import Tuple
+from unittest.mock import Mock
 
+import pytest
 from allauth.account.signals import user_logged_in
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.test import override_settings
-from django.test import TestCase
 from django.urls import reverse
+from django.urls import reverse_lazy
 from django_otp.oath import TOTP
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from pytest_django.asserts import assertRedirects
 
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
 
-def normalize_url(url):
-    """Sort the URL's query string parameters."""
-    url = str(url)  # Coerce reverse_lazy() URLs.
-    scheme, netloc, path, params, query, fragment = urlparse(url)
-    query_parts = sorted(parse_qsl(query))
-    return urlunparse((scheme, netloc, path, params, urlencode(query_parts), fragment))
+TWO_FACTOR_AUTH_URL = reverse_lazy("two-factor-authenticate")
+TWO_FACTOR_SETUP_URL = reverse_lazy("two-factor-setup")
+LOGIN_URL = reverse_lazy("account_login")
+JOHN_CREDENTIALS = {"login": "john", "password": "doe"}
 
 
-class Test2Factor(TestCase):
-    def setUp(self):
-        # Track the signals sent via allauth.
-        self.user_logged_in_count = 0
-        user_logged_in.connect(self._login_callback)
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
 
-    def _login_callback(self, sender, **kwargs):
-        self.user_logged_in_count += 1
 
-    def test_standard_login(self):
-        """Test login behavior when 2FA is not configured."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
+@pytest.fixture()
+def john() -> "AbstractUser":
+    user = get_user_model().objects.create(username="john")
+    user.set_password("doe")
+    user.save()
+    return user
 
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
+
+@pytest.fixture()
+def john_with_totp(john: AbstractUser) -> Tuple[AbstractUser, TOTPDevice]:
+    totp_model = john.totpdevice_set.create()
+    return (john, totp_model)
+
+
+@pytest.fixture()
+def user_logged_in_count(request) -> Callable[[], int]:
+    login_callback = Mock()
+    user_logged_in.connect(login_callback)
+    request.addfinalizer(lambda: user_logged_in.disconnect(login_callback))
+
+    def get_login_count() -> int:
+        return login_callback.call_count
+
+    return get_login_count
+
+
+def login(client, *, expected_redirect_url: Optional[str], credentials=None):
+    if credentials is None:
+        credentials = JOHN_CREDENTIALS
+    resp = client.post(LOGIN_URL, credentials)
+    if expected_redirect_url:
+        assertRedirects(resp, expected_redirect_url, fetch_redirect_response=False)
+
+
+def get_token_from_totp_device(totp_model) -> str:
+    return TOTP(
+        key=totp_model.bin_key,
+        step=totp_model.step,
+        t0=totp_model.t0,
+        digits=totp_model.digits,
+    ).token()
+
+
+def do_totp_authentication(
+    client,
+    totp_device: TOTPDevice,
+    *,
+    expected_redirect_url: Optional[str],
+    auth_url: str = TWO_FACTOR_AUTH_URL,
+):
+    token = get_token_from_totp_device(totp_device)
+    resp = client.post(auth_url, {"otp_token": token})
+    if expected_redirect_url:
+        assertRedirects(resp, expected_redirect_url, fetch_redirect_response=False)
+
+
+def test_standard_login(client, john, user_logged_in_count):
+    """Test login behavior when 2FA is not configured."""
+    login(client, expected_redirect_url=settings.LOGIN_REDIRECT_URL)
+
+    # Ensure the signal is received as expected.
+    assert user_logged_in_count() == 1
+
+
+def test_2fa_login(client, john_with_totp, user_logged_in_count):
+    """Test login behavior when 2FA is configured."""
+    user, totp_device = john_with_totp
+    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
+
+    # Ensure no signal is received yet.
+    assert user_logged_in_count() == 0
+
+    # Now ensure that logging in actually works.
+    do_totp_authentication(
+        client,
+        totp_device=totp_device,
+        expected_redirect_url=settings.LOGIN_REDIRECT_URL,
+    )
+
+    # Ensure the signal is received as expected.
+    assert user_logged_in_count() == 1
+
+
+def test_invalid_2fa_login(client, john_with_totp):
+    """Test login behavior when 2FA is configured and wrong code is given."""
+    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
+
+    # Ensure that logging in does not work with invalid token
+    resp = client.post(TWO_FACTOR_AUTH_URL, {"otp_token": "invalid"})
+    assert resp.status_code == 200
+
+
+def test_2fa_redirect(client, john):
+    """
+    Going to the 2FA login page when not logged in (or when fully logged in)
+    should redirect.
+    """
+
+    # Not logged in.
+    resp = client.get(TWO_FACTOR_AUTH_URL)
+    assertRedirects(resp, LOGIN_URL, fetch_redirect_response=False)
+
+    login(client, expected_redirect_url=settings.LOGIN_REDIRECT_URL)
+
+    resp = client.get(TWO_FACTOR_AUTH_URL)
+    assertRedirects(resp, LOGIN_URL, fetch_redirect_response=False)
+
+
+@pytest.mark.parametrize("target_url", [LOGIN_URL, "/unnamed-view"])
+def test_2fa_reset_flow(client, john_with_totp, target_url):
+    """
+    Ensure the login flow is reset when navigating away before entering
+    two-factor credentials.
+    """
+    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
+
+    # The user ID should be in the session.
+    assert client.session.get("allauth_2fa_user_id")
+
+    # Navigate to a different page.
+    client.get(target_url)
+
+    # The middleware should reset the login flow.
+    assert not client.session.get("allauth_2fa_user_id")
+
+    # Trying to continue with two-factor without logging in again will
+    # redirect to login.
+    resp = client.get(TWO_FACTOR_AUTH_URL)
+
+    assertRedirects(resp, LOGIN_URL, fetch_redirect_response=False)
+
+
+@pytest.mark.parametrize("next_via", ["get", "post"])
+def test_2fa_login_forwarding_get_parameters(client, john_with_totp, next_via: str):
+    """
+    Test that the 2FA workflow passes forward the GET parameters sent to the
+    TwoFactorAuthenticate view.
+    """
+
+    # Add a next to unnamed-view.
+    if next_via == "post":
+        resp = client.post(
+            LOGIN_URL + "?existing=param",
+            {**JOHN_CREDENTIALS, "next": "unnamed-view"},
+            follow=True,
         )
-        self.assertRedirects(
-            resp, settings.LOGIN_REDIRECT_URL, fetch_redirect_response=False
-        )
-
-        # Ensure the signal is received as expected.
-        self.assertEqual(self.user_logged_in_count, 1)
-
-    def test_2fa_login(self):
-        """Test login behavior when 2FA is configured."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        totp_model = user.totpdevice_set.create()
-
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-        self.assertRedirects(
-            resp, reverse("two-factor-authenticate"), fetch_redirect_response=False
-        )
-
-        # Now ensure that logging in actually works.
-        totp = TOTP(
-            totp_model.bin_key, totp_model.step, totp_model.t0, totp_model.digits
-        )
-        resp = self.client.post(
-            reverse("two-factor-authenticate"), {"otp_token": totp.token()}
-        )
-        self.assertRedirects(
-            resp, settings.LOGIN_REDIRECT_URL, fetch_redirect_response=False
-        )
-
-        # Ensure the signal is received as expected.
-        self.assertEqual(self.user_logged_in_count, 1)
-
-    def test_invalid_2fa_login(self):
-        """Test login behavior when 2FA is configured and wrong code is given."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        user.totpdevice_set.create()
-
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-        self.assertRedirects(
-            resp, reverse("two-factor-authenticate"), fetch_redirect_response=False
-        )
-
-        # Ensure that logging in does not work with invalid token
-        resp = self.client.post(
-            reverse("two-factor-authenticate"), {"otp_token": "invalid"}
-        )
-        self.assertEqual(resp.status_code, 200)
-
-    def test_2fa_redirect(self):
-        """
-        Going to the 2FA login page when not logged in (or when fully logged in)
-        should redirect.
-        """
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-
-        # Not logged in.
-        resp = self.client.get(reverse("two-factor-authenticate"))
-        self.assertRedirects(
-            resp, reverse("account_login"), fetch_redirect_response=False
-        )
-
-        # Logged in.
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-
-        resp = self.client.get(reverse("two-factor-authenticate"))
-        self.assertRedirects(
-            resp, reverse("account_login"), fetch_redirect_response=False
-        )
-
-    def test_2fa_reset_flow(self):
-        """
-        Ensure the login flow is reset when navigating away before entering
-        two-factor credentials.
-        """
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        user.totpdevice_set.create()
-
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-        self.assertRedirects(
-            resp, reverse("two-factor-authenticate"), fetch_redirect_response=False
-        )
-
-        # The user ID should be in the session.
-        self.assertIn("allauth_2fa_user_id", self.client.session)
-
-        # Navigate to a different page.
-        self.client.get(reverse("account_login"))
-
-        # The middleware should reset the login flow.
-        self.assertNotIn("allauth_2fa_user_id", self.client.session)
-
-        # Trying to continue with two-factor without logging in again will
-        # redirect to login.
-        resp = self.client.get(reverse("two-factor-authenticate"))
-
-        self.assertRedirects(
-            resp, reverse("account_login"), fetch_redirect_response=False
-        )
-
-    def test_2fa_login_forwarding_get_parameters(self):
-        """
-        Test that the 2FA workflow passes forward the GET parameters sent to the
-        TwoFactorAuthenticate view.
-        """
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        user.totpdevice_set.create()
-
-        # Add a next to unnamed-view.
-        resp = self.client.post(
-            reverse("account_login") + "?existing=param&next=unnamed-view",
-            {"login": "john", "password": "doe"},
+    else:
+        resp = client.post(
+            LOGIN_URL + "?existing=param&next=unnamed-view",
+            JOHN_CREDENTIALS,
             follow=True,
         )
 
-        # Ensure that the unnamed-view is still being forwarded to.
-        resp.redirect_chain[-1] = (
-            normalize_url(resp.redirect_chain[-1][0]),
-            resp.redirect_chain[-1][1],
-        )
-        self.assertRedirects(
+    # Ensure that the unnamed-view is still being forwarded to.
+    assertRedirects(
+        resp,
+        TWO_FACTOR_AUTH_URL + "?existing=param&next=unnamed-view",
+        fetch_redirect_response=False,
+    )
+
+
+def test_anonymous(client):
+    """
+    Views should not be hittable via an AnonymousUser.
+    """
+    # The authentication page redirects to the login page.
+    resp = client.get(TWO_FACTOR_AUTH_URL)
+    assertRedirects(resp, LOGIN_URL, fetch_redirect_response=False)
+
+    # Some pages redirect to the login page and then will redirect back.
+    for url in [
+        "two-factor-setup",
+        "two-factor-backup-tokens",
+        "two-factor-remove",
+    ]:
+        url = reverse(url)
+        resp = client.get(url)
+        assertRedirects(
             resp,
-            normalize_url(
-                reverse("two-factor-authenticate") + "?existing=param&next=unnamed-view"
-            ),
+            LOGIN_URL + "?next=" + url,
             fetch_redirect_response=False,
         )
 
-    def test_2fa_login_forwarding_next_via_post(self):
-        """
-        Test that the 2FA workflow passes forward to next via POST parameters sent to
-        the TwoFactorAuthenticate view.
-        """
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        user.totpdevice_set.create()
 
-        # Add a next to unnamed-view.
-        resp = self.client.post(
-            reverse("account_login") + "?existing=param",
-            {"login": "john", "password": "doe", "next": "unnamed-view"},
-            follow=True,
-        )
+def test_backwards_compatible_url(client, john_with_totp, user_logged_in_count):
+    """Ensure that the old 2FA URLs still work."""
+    # TODO(1.0): remove this test
+    user, totp_device = john_with_totp
+    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
+    # The old URL doesn't have a trailing slash.
+    do_totp_authentication(
+        client,
+        totp_device=totp_device,
+        auth_url=str(TWO_FACTOR_AUTH_URL).rstrip("/"),
+        expected_redirect_url=settings.LOGIN_REDIRECT_URL,
+    )
 
-        # Ensure that the unnamed-view is still being forwarded to, preserving existing
-        # query params.
-        resp.redirect_chain[-1] = (
-            normalize_url(resp.redirect_chain[-1][0]),
-            resp.redirect_chain[-1][1],
-        )
-        self.assertRedirects(
-            resp,
-            normalize_url(
-                reverse("two-factor-authenticate") + "?existing=param&next=unnamed-view"
-            ),
-            fetch_redirect_response=False,
-        )
+    # Ensure the signal is received as expected.
+    assert user_logged_in_count() == 1
 
-    def test_anonymous(self):
-        """
-        Views should not be hittable via an AnonymousUser.
-        """
-        # The authentication page redirects to the login page.
-        url = reverse("two-factor-authenticate")
-        resp = self.client.get(url)
-        self.assertRedirects(
-            resp, reverse("account_login"), fetch_redirect_response=False
-        )
 
-        # Some pages redirect to the login page and then will redirect back.
-        for url in [
-            "two-factor-setup",
-            "two-factor-backup-tokens",
-            "two-factor-remove",
-        ]:
-            url = reverse(url)
-            resp = self.client.get(url)
-            self.assertRedirects(
-                resp,
-                reverse("account_login") + "?next=" + url,
-                fetch_redirect_response=False,
-            )
+def test_not_configured_redirect(client, john):
+    """Viewing backup codes or disabling 2FA should redirect if 2FA is not
+    configured."""
+    login(client, expected_redirect_url=settings.LOGIN_REDIRECT_URL)
 
-    def test_unnamed_view(self):
-        """Views without names should not throw an exception."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        user.totpdevice_set.create()
-
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-        self.assertRedirects(
-            resp, reverse("two-factor-authenticate"), fetch_redirect_response=False
-        )
-
-        # The user ID should be in the session.
-        self.assertIn("allauth_2fa_user_id", self.client.session)
-
-        # Navigate to a different (unnamed) page.
-        resp = self.client.get("/unnamed-view")
-
-        # The middleware should reset the login flow.
-        self.assertNotIn("allauth_2fa_user_id", self.client.session)
-
-        # Trying to continue with two-factor without logging in again will
-        # redirect to login.
-        resp = self.client.get(reverse("two-factor-authenticate"))
-
-        self.assertRedirects(
-            resp, reverse("account_login"), fetch_redirect_response=False
-        )
-
-    def test_backwards_compatible_url(self):
-        """Ensure that the old 2FA URLs still work."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        totp_model = user.totpdevice_set.create()
-
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-        self.assertRedirects(
-            resp, reverse("two-factor-authenticate"), fetch_redirect_response=False
-        )
-
-        # Now ensure that logging in actually works.
-        totp = TOTP(
-            totp_model.bin_key, totp_model.step, totp_model.t0, totp_model.digits
-        )
-
-        # The old URL doesn't have a trailing slash.
-        url = reverse("two-factor-authenticate").rstrip("/")
-
-        resp = self.client.post(url, {"otp_token": totp.token()})
-        self.assertRedirects(
-            resp, settings.LOGIN_REDIRECT_URL, fetch_redirect_response=False
-        )
-
-        # Ensure the signal is received as expected.
-        self.assertEqual(self.user_logged_in_count, 1)
-
-    def test_not_configured_redirect(self):
-        """Viewing backup codes or disabling 2FA should redirect if 2FA is not
-        configured."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-
-        # Login
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-
-        # The 2FA pages should redirect.
-        for url_name in ["two-factor-backup-tokens", "two-factor-remove"]:
-            resp = self.client.get(reverse(url_name))
-            self.assertRedirects(
-                resp, reverse("two-factor-setup"), fetch_redirect_response=False
-            )
+    # The 2FA pages should redirect.
+    for url_name in ["two-factor-backup-tokens", "two-factor-remove"]:
+        resp = client.get(reverse(url_name))
+        assertRedirects(resp, TWO_FACTOR_SETUP_URL, fetch_redirect_response=False)
 
 
 class Require2FA(BaseRequire2FAMiddleware):
@@ -326,50 +246,26 @@ class Require2FA(BaseRequire2FAMiddleware):
         return True
 
 
-@override_settings(
-    # Don't redirect to an "allowed" URL.
-    LOGIN_REDIRECT_URL="/unnamed-view",
-    # Add the middleware that requires 2FA.
-    MIDDLEWARE=settings.MIDDLEWARE + ("tests.test_allauth_2fa.Require2FA",),
-)
-class TestRequire2FAMiddleware(TestCase):
-    def test_no_2fa(self):
-        """Test login behavior when 2FA is not configured."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
+@pytest.mark.parametrize("with_messages", (False, True))
+def test_require_2fa_middleware(client, john, settings, with_messages):
+    new_middleware = [
+        # Add the middleware that requires 2FA.
+        "tests.test_allauth_2fa.Require2FA",
+    ]
+    new_installed_apps = []
 
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}, follow=True
-        )
+    if with_messages:
+        new_middleware.append("django.contrib.messages.middleware.MessageMiddleware")
+        new_installed_apps.append("django.contrib.messages")
+
+    with override_settings(
+        # Don't redirect to an "allowed" URL.
+        LOGIN_REDIRECT_URL="/unnamed-view",
+        MIDDLEWARE=settings.MIDDLEWARE + tuple(new_middleware),
+        INSTALLED_APPS=settings.INSTALLED_APPS + tuple(new_installed_apps),
+    ):
+        resp = client.post(LOGIN_URL, JOHN_CREDENTIALS, follow=True)
         # The user is redirected to the 2FA setup page.
-        self.assertRedirects(
-            resp, reverse("two-factor-setup"), fetch_redirect_response=False
-        )
-
-    @override_settings(
-        INSTALLED_APPS=settings.INSTALLED_APPS + ("django.contrib.messages",),
-        # This doesn't seem to stack nicely with the class-based one, so add the
-        # middleware here.
-        MIDDLEWARE=settings.MIDDLEWARE
-        + (
-            "tests.test_allauth_2fa.Require2FA",
-            "django.contrib.messages.middleware.MessageMiddleware",
-        ),
-    )
-    def test_no_2fa_messages(self):
-        """Test login behavior when 2FA is not configured and the messages framework is
-        in use.
-        """
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}, follow=True
-        )
-
-        # The user is redirected to the 2FA setup page.
-        self.assertRedirects(
-            resp, reverse("two-factor-setup"), fetch_redirect_response=False
-        )
+        # (In particular, see that the last redirect brought us to the 2FA setup page.)
+        assert resp.redirect_chain[-1][0] == TWO_FACTOR_SETUP_URL
+        # TODO: check messages?
