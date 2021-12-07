@@ -347,32 +347,6 @@ class TestRequire2FAMiddleware(TestCase):
             resp, reverse("two-factor-setup"), fetch_redirect_response=False
         )
 
-    def test_2fa(self):
-        """Test login behavior when 2FA is configured."""
-        user = get_user_model().objects.create(username="john")
-        user.set_password("doe")
-        user.save()
-        totp_model = user.totpdevice_set.create()
-
-        resp = self.client.post(
-            reverse("account_login"), {"login": "john", "password": "doe"}
-        )
-        self.assertRedirects(
-            resp, reverse("two-factor-authenticate"), fetch_redirect_response=False
-        )
-
-        # Now ensure that logging in actually works.
-        totp = TOTP(
-            totp_model.bin_key, totp_model.step, totp_model.t0, totp_model.digits
-        )
-        resp = self.client.post(
-            reverse("two-factor-authenticate"), {"otp_token": totp.token()}
-        )
-        # The user ends up on the normal redirect login page.
-        self.assertRedirects(
-            resp, settings.LOGIN_REDIRECT_URL, fetch_redirect_response=False
-        )
-
     @override_settings(
         INSTALLED_APPS=settings.INSTALLED_APPS + ("django.contrib.messages",),
         # This doesn't seem to stack nicely with the class-based one, so add the
