@@ -17,6 +17,10 @@ from pytest_django.asserts import assertRedirects
 
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
+ADAPTER_CLASSES = [
+    "allauth_2fa.adapter.OTPAdapter",
+    "tests.adapter.CustomAdapter",
+]
 
 TWO_FACTOR_AUTH_URL = reverse_lazy("two-factor-authenticate")
 TWO_FACTOR_SETUP_URL = reverse_lazy("two-factor-setup")
@@ -27,6 +31,18 @@ JOHN_CREDENTIALS = {"login": "john", "password": "doe"}
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
     pass
+
+
+def pytest_generate_tests(metafunc):
+    if "adapter" in metafunc.fixturenames:
+        metafunc.parametrize("adapter", ADAPTER_CLASSES, indirect=True)
+
+
+@pytest.fixture(autouse=True)
+def adapter(request, settings):
+    settings.ACCOUNT_ADAPTER = request.param
+    # Can be used to verify the class is correct:
+    # assert get_adapter().__class__.__name__ == request.param.rpartition(".")[-1]
 
 
 @pytest.fixture()
