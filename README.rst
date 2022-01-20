@@ -85,11 +85,11 @@ The test project can also be used as a minimal example using the following:
 .. code-block:: bash
 
     # Migrate the SQLite database first.
-    DJANGO_SETTINGS_MODULE=tests.run_settings python manage.py migrate
+    DJANGO_SETTINGS_MODULE=tests.settings python manage.py migrate
     # Run the server with debug.
-    DJANGO_SETTINGS_MODULE=tests.run_settings python manage.py runserver_plus
+    DJANGO_SETTINGS_MODULE=tests.settings python manage.py runserver_plus
     # Run the shell.
-    DJANGO_SETTINGS_MODULE=tests.run_settings python manage.py shell_plus
+    DJANGO_SETTINGS_MODULE=tests.settings python manage.py shell_plus
 
 .. _Víðir Valberg Guðmundsson (@valberg): https://github.com/valberg
 .. _Percipient Networks: https://www.strongarm.io

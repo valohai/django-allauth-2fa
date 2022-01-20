@@ -1,5 +1,6 @@
 import django
 
+DEBUG = True
 SECRET_KEY = "not_empty"
 SITE_ID = 1
 ALLOWED_HOSTS = ["*"]
@@ -7,7 +8,10 @@ ALLOWED_HOSTS = ["*"]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
+        "NAME": "db.sqlite",
+        "TEST": {
+            "NAME": ":memory:",
+        },
     }
 }
 
@@ -53,6 +57,13 @@ INSTALLED_APPS = (
     # Test app.
     "tests",
 )
+
+try:
+    import django_extensions  # noqa: F401
+
+    INSTALLED_APPS += ("django_extensions",)
+except ImportError:
+    pass
 
 MIDDLEWARE = (
     # Configure Django auth package.
