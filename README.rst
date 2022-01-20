@@ -4,8 +4,8 @@ Welcome to django-allauth-2fa!
 .. image:: https://github.com/valohai/django-allauth-2fa/actions/workflows/ci.yml/badge.svg
     :target: https://github.com/valohai/django-allauth-2fa/actions/workflows/ci.yml
 
-.. image:: https://coveralls.io/repos/github/valohai/django-allauth-2fa/badge.svg?branch=main
-    :target: https://coveralls.io/github/valohai/django-allauth-2fa?branch=main
+.. image:: https://codecov.io/gh/valohai/django-allauth-2fa/branch/main/graph/badge.svg
+    :target: https://codecov.io/gh/valohai/django-allauth-2fa
 
 .. image:: https://readthedocs.org/projects/django-allauth-2fa/badge/?version=latest
     :target: https://django-allauth-2fa.readthedocs.io/
@@ -52,8 +52,9 @@ Contributing
 ------------
 
 django-allauth-2fa was initially created by
-`Víðir Valberg Guðmundsson (@valberg)`_, and is currently maintained by
-`Percipient Networks`_. Please feel free to contribute if you find
+`Víðir Valberg Guðmundsson (@valberg)`_, was maintained by
+`Percipient Networks`_ for many years, and is now maintained by
+`Valohai`_. Please feel free to contribute if you find
 django-allauth-2fa useful!
 
 #. Check for open issues or open a fresh issue to start a discussion
@@ -93,4 +94,5 @@ The test project can also be used as a minimal example using the following:
 
 .. _Víðir Valberg Guðmundsson (@valberg): https://github.com/valberg
 .. _Percipient Networks: https://www.strongarm.io
-.. _the repository: http://github.com/percipient/django-allauth-2fa
+.. _Valohai: https://valohai.com/
+.. _the repository: http://github.com/valohai/django-allauth-2fa
