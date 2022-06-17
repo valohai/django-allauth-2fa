@@ -196,8 +196,12 @@ def test_2fa_removal(client, john_with_totp):
     # Navigate to 2FA removal view
     client.get(reverse("two-factor-remove"))
 
+    # reset throttling and get another token
+    totp_device.throttle_reset()
+    token = get_token_from_totp_device(totp_device)
+
     # ... and POST to confirm
-    client.post(reverse("two-factor-remove"))
+    client.post(reverse("two-factor-remove"), {"token": token})
 
     assert not user.totpdevice_set.exists()
 
