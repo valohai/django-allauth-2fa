@@ -6,10 +6,11 @@
   {% trans "Disable Two-Factor Authentication" %}
 </h1>
 
-<p>{% trans "Are you sure?" %}</p>
+<p>{% trans "Please enter a valid authentication token to disable two-factor authentication:" %}</p>
 
 <form method="post">
   {% csrf_token %}
+  {{ form.as_p }}
   <button type="submit">
     {% trans 'Disable Two-Factor' %}
   </button>
