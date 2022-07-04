@@ -3,6 +3,19 @@
 Changelog
 #########
 
+0.10.0 - July 4, 2022
+=====================
+
+If you're using a custom template for the 2FA token removal view,
+note that you will need to also display the ``token`` field beginning
+with this version (PR #135 in particular).
+
+The minimum version of django-otp was bumped to 0.6.x.
+
+* Update CI bits and bobs by @akx in #137
+* Drop support for django-otp 0.5.x by @akx in #138
+* Require user token to disable 2FA by @SchrodingersGat in #135
+
 0.9 - April 11, 2022
 ====================
 
