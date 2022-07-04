@@ -266,23 +266,6 @@ def test_anonymous(client):
         )
 
 
-def test_backwards_compatible_url(client, john_with_totp, user_logged_in_count):
-    """Ensure that the old 2FA URLs still work."""
-    # TODO(1.0): remove this test
-    user, totp_device = john_with_totp
-    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
-    # The old URL doesn't have a trailing slash.
-    do_totp_authentication(
-        client,
-        totp_device=totp_device,
-        auth_url=str(TWO_FACTOR_AUTH_URL).rstrip("/"),
-        expected_redirect_url=settings.LOGIN_REDIRECT_URL,
-    )
-
-    # Ensure the signal is received as expected.
-    assert user_logged_in_count() == 1
-
-
 def test_not_configured_redirect(client, john):
     """Viewing backup codes or disabling 2FA should redirect if 2FA is not
     configured."""
