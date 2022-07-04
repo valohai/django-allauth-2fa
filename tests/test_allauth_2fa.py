@@ -182,8 +182,9 @@ def test_2fa_reset_flow(client, john_with_totp, target_url):
     assertRedirects(resp, LOGIN_URL, fetch_redirect_response=False)
 
 
-def test_2fa_removal(client, john_with_totp):
-    """Removing 2FA should be possible."""
+@pytest.mark.parametrize("token_state", ["none", "correct", "incorrect"])
+def test_2fa_removal(client, john_with_totp, token_state):
+    """Removing 2FA should be possible with a correct token."""
     user, totp_device = john_with_totp
     login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
     do_totp_authentication(
@@ -196,14 +197,21 @@ def test_2fa_removal(client, john_with_totp):
     # Navigate to 2FA removal view
     client.get(reverse("two-factor-remove"))
 
-    # reset throttling and get another token
-    totp_device.throttle_reset()
-    token = get_token_from_totp_device(totp_device)
+    if token_state == "correct":
+        # reset throttling and get another token
+        totp_device.throttle_reset()
+        form_data = {"token": get_token_from_totp_device(totp_device)}
+    elif token_state == "incorrect":
+        form_data = {"token": "hernekeitto"}
+    else:
+        form_data = {}
 
     # ... and POST to confirm
-    client.post(reverse("two-factor-remove"), {"token": token})
+    client.post(reverse("two-factor-remove"), form_data)
 
-    assert not user.totpdevice_set.exists()
+    # The only case when the TOTP device should be removed is when the token is correct.
+    was_removed = not user.totpdevice_set.exists()
+    assert was_removed == (token_state == "correct")
 
 
 @pytest.mark.parametrize("next_via", ["get", "post"])
