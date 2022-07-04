@@ -78,7 +78,7 @@ Finally, you must include the django-allauth-2fa URLs:
 
     urlpatterns = [
         # Include the allauth and 2FA urls from their respective packages.
-        path('accounts/', include('allauth_2fa.urls')),
+        path('accounts/two-factor/', include('allauth_2fa.urls')),
         path('accounts/', include('allauth.urls')),
     ]
 
