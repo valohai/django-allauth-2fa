@@ -6,6 +6,12 @@ from django.utils.translation import gettext_lazy as _
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
+DEFAULT_TOKEN_WIDGET_ATTRS = {
+    "autofocus": "autofocus",
+    "autocomplete": "off",
+    "inputmode": "numeric",
+}
+
 
 class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
     otp_token = forms.CharField(
@@ -14,13 +20,7 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
 
     def __init__(self, user, **kwargs):
         super().__init__(**kwargs)
-        self.fields["otp_token"].widget.attrs.update(
-            {
-                "autofocus": "autofocus",
-                "autocomplete": "off",
-                "inputmode": "numeric",
-            }
-        )
+        self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
         self.user = user
 
     def clean(self):
@@ -35,12 +35,7 @@ class TOTPDeviceForm(forms.Form):
 
     def __init__(self, user, metadata=None, **kwargs):
         super().__init__(**kwargs)
-        self.fields["token"].widget.attrs.update(
-            {
-                "autofocus": "autofocus",
-                "autocomplete": "off",
-            }
-        )
+        self.fields["token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
         self.user = user
         self.metadata = metadata or {}
 
@@ -65,9 +60,27 @@ class TOTPDeviceForm(forms.Form):
 
 
 class TOTPDeviceRemoveForm(forms.Form):
+
+    # User must input a valid token so 2FA can be removed
+    token = forms.CharField(
+        label=_("Token"),
+    )
+
     def __init__(self, user, **kwargs):
         super().__init__(**kwargs)
         self.user = user
+        self.fields["token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
+
+    def clean_token(self):
+        # Ensure that the user has provided a valid token
+        token = self.cleaned_data.get("token")
+
+        # Verify that the user has provided a valid token
+        for device in self.user.totpdevice_set.filter(confirmed=True):
+            if device.verify_token(token):
+                return token
+
+        raise forms.ValidationError(_("The entered token is not valid"))
 
     def save(self):
         with contextlib.suppress(ObjectDoesNotExist):
