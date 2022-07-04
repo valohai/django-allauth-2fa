@@ -3,13 +3,28 @@
 Changelog
 #########
 
-next
-====
+0.9 - April 11, 2022
+====================
 
-* Improves documentation for protection Django admin with 2FA. Contributed by
-  @hailkomputer in #91.
-* Autocomplete on the token entry form is disabled. Contributed by @qvicksilver
-  in #95.
+This release dropped support for Python 3.5 and added support for Django 4.0.
+
+* Improves documentation for protection Django admin with 2FA. Contributed by @hailkomputer in #91.
+* Autocomplete on the token entry form is disabled. Contributed by @qvicksilver in #95.
+* Stop restricting a class of an adapter in `TwoFactorAuthenticate` by @illia-v in #96
+* Use same base template as upstream allauth by @ErwinJunge in #98
+* Redirect to next, when given via GET or POST by @ErwinJunge in #99
+* Allow TOTP removal when no backup device is present by @akx in #126
+* Fix for subclassed OTP adapter by @squio in #129
+* Replace Travis with GitHub Actions by @akx in #110
+* Drop EOL Python 3.5, modernize for 3.6+ by @akx in #106
+* Remove Django 1.11 from tox, and add Django 4.0b1. by @valberg in #118
+* Typo in docs by @beckedorf in #122
+* Add pre-commit, and run it. by @valberg in #121
+* Rename master -> main by @akx in #123
+* Declarative setup.cfg by @akx in #124
+* Use Py.test for tests + fix coverage reporting by @akx in #127
+* Require2FAMiddleware improvements by @akx in #107
+* Miscellaneous housekeeping by @akx in #130
 
 0.8 February 3, 2020
 ====================
