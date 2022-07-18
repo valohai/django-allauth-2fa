@@ -27,7 +27,7 @@ from allauth_2fa.utils import user_has_valid_totp_device
 
 
 class TwoFactorAuthenticate(FormView):
-    template_name = "allauth_2fa/authenticate." + app_settings.TEMPLATE_EXTENSION
+    template_name = f"allauth_2fa/authenticate.{app_settings.TEMPLATE_EXTENSION}"
     form_class = TOTPAuthenticateForm
 
     def dispatch(self, request, *args, **kwargs):
@@ -84,7 +84,7 @@ class TwoFactorAuthenticate(FormView):
 
 
 class TwoFactorSetup(LoginRequiredMixin, FormView):
-    template_name = "allauth_2fa/setup." + app_settings.TEMPLATE_EXTENSION
+    template_name = f"allauth_2fa/setup.{app_settings.TEMPLATE_EXTENSION}"
     form_class = TOTPDeviceForm
     success_url = reverse_lazy("two-factor-backup-tokens")
 
@@ -137,7 +137,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
 
 
 class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
-    template_name = "allauth_2fa/remove." + app_settings.TEMPLATE_EXTENSION
+    template_name = f"allauth_2fa/remove.{app_settings.TEMPLATE_EXTENSION}"
     form_class = TOTPDeviceRemoveForm
     success_url = reverse_lazy("two-factor-setup")
 
@@ -152,7 +152,7 @@ class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
 
 
 class TwoFactorBackupTokens(ValidTOTPDeviceRequiredMixin, TemplateView):
-    template_name = "allauth_2fa/backup_tokens." + app_settings.TEMPLATE_EXTENSION
+    template_name = f"allauth_2fa/backup_tokens.{app_settings.TEMPLATE_EXTENSION}"
     # This can be overridden in a subclass to True,
     # to have that particular view always reveal the tokens.
     reveal_tokens = bool(app_settings.ALWAYS_REVEAL_BACKUP_TOKENS)
