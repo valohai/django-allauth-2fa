@@ -8,7 +8,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.views.generic import FormView
@@ -86,12 +85,12 @@ class TwoFactorAuthenticate(FormView):
 class TwoFactorSetup(LoginRequiredMixin, FormView):
     template_name = f"allauth_2fa/setup.{app_settings.TEMPLATE_EXTENSION}"
     form_class = TOTPDeviceForm
-    success_url = reverse_lazy("two-factor-backup-tokens")
+    success_url = reverse_lazy(app_settings.SETUP_SUCCESS_URL)
 
     def dispatch(self, request, *args, **kwargs):
         # If the user has 2FA setup already, redirect them to the backup tokens.
         if user_has_valid_totp_device(request.user):
-            return HttpResponseRedirect(reverse("two-factor-backup-tokens"))
+            return HttpResponseRedirect(self.get_success_url())
 
         return super().dispatch(request, *args, **kwargs)
 
@@ -139,7 +138,7 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
 class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
     template_name = f"allauth_2fa/remove.{app_settings.TEMPLATE_EXTENSION}"
     form_class = TOTPDeviceRemoveForm
-    success_url = reverse_lazy("two-factor-setup")
+    success_url = reverse_lazy(app_settings.REMOVE_SUCCESS_URL)
 
     def form_valid(self, form):
         form.save()

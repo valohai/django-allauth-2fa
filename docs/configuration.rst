@@ -19,3 +19,13 @@ Whether to always show the remaining backup tokens on the
 Backup Tokens view, or only when they're freshly generated.
 
 Defaults to ``True``.
+
+``ALLAUTH_2FA_REMOVE_SUCCESS_URL``
+-----------------------------------
+
+The URL name to redirect to after removing a 2FA device.
+
+``ALLAUTH_2FA_SETUP_SUCCESS_URL``
+----------------------------------
+
+The URL name to redirect to after setting up a 2FA device.

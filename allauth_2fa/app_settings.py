@@ -8,3 +8,11 @@ TEMPLATE_EXTENSION = getattr(
 ALWAYS_REVEAL_BACKUP_TOKENS = bool(
     getattr(settings, "ALLAUTH_2FA_ALWAYS_REVEAL_BACKUP_TOKENS", True)
 )
+
+REMOVE_SUCCESS_URL = getattr(
+    settings, "ALLAUTH_2FA_REMOVE_SUCCESS_URL", "two-factor-setup"
+)
+
+SETUP_SUCCESS_URL = getattr(
+    settings, "ALLAUTH_2FA_SETUP_SUCCESS_URL", "two-factor-backup-tokens"
+)
