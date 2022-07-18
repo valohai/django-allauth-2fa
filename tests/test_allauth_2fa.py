@@ -224,13 +224,13 @@ def test_2fa_login_forwarding_get_parameters(client, john_with_totp, next_via: s
     # Add a next to unnamed-view.
     if next_via == "post":
         resp = client.post(
-            LOGIN_URL + "?existing=param",
+            f"{LOGIN_URL}?existing=param",
             {**JOHN_CREDENTIALS, "next": "unnamed-view"},
             follow=True,
         )
     else:
         resp = client.post(
-            LOGIN_URL + "?existing=param&next=unnamed-view",
+            f"{LOGIN_URL}?existing=param&next=unnamed-view",
             JOHN_CREDENTIALS,
             follow=True,
         )
@@ -238,7 +238,7 @@ def test_2fa_login_forwarding_get_parameters(client, john_with_totp, next_via: s
     # Ensure that the unnamed-view is still being forwarded to.
     assertRedirects(
         resp,
-        TWO_FACTOR_AUTH_URL + "?existing=param&next=unnamed-view",
+        f"{TWO_FACTOR_AUTH_URL}?existing=param&next=unnamed-view",
         fetch_redirect_response=False,
     )
 
@@ -261,7 +261,7 @@ def test_anonymous(client):
         resp = client.get(url)
         assertRedirects(
             resp,
-            LOGIN_URL + "?next=" + url,
+            f"{LOGIN_URL}?next={url}",
             fetch_redirect_response=False,
         )
 
