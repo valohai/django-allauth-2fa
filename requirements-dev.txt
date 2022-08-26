@@ -1,16 +1,13 @@
-# Install the current directory as an editable package. Denpendencies required
-# for installing the package and running unit tests are defined in setup.py.
--e .
+# Dependencies required for installing the package are defined in setup.cfg.
+# Dependencies for tests are in requirements-test.txt.
+
+-e .  # Install the current directory as an editable package.
 
 # Nice for development.
 django-extensions==2.2.6
 ipdb==0.12.3
 ipython==7.12.0
 Werkzeug==0.16.1
-
-# Style checking.
-flake8==3.7.9
-flake8-import-order==0.18.1
 
 # For documentation.
 Sphinx==1.6.5

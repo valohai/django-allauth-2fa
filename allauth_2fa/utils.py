@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from django.contrib.sites.shortcuts import get_current_site
 
 import qrcode
+from django.contrib.sites.shortcuts import get_current_site
 from qrcode.image.svg import SvgPathImage
 from allauth_2fa import app_settings
 
@@ -30,19 +31,20 @@ def code_has_expired(user_id):
     return datetime.now() - timedelta(minutes=app_settings.CODE_EXPIRY_MINUTES) > ATTEMPTS_CACHE[user_id]
 
 
+def get_device_base32_secret(device):
+    return b32encode(device.bin_key).decode("utf-8")
+
+
 def generate_totp_config_svg(device, issuer, label):
     params = {
-        'secret': b32encode(device.bin_key).decode('utf-8'),
-        'algorithm': 'SHA1',
-        'digits': device.digits,
-        'period': device.step,
-        'issuer': issuer,
+        "secret": get_device_base32_secret(device),
+        "algorithm": "SHA1",
+        "digits": device.digits,
+        "period": device.step,
+        "issuer": issuer,
     }
 
-    otpauth_url = 'otpauth://totp/{label}?{query}'.format(
-        label=quote(label),
-        query=urlencode(params),
-    )
+    otpauth_url = f"otpauth://totp/{quote(label)}?{urlencode(params)}"
 
     img = qrcode.make(otpauth_url, image_factory=SvgPathImage)
     io = BytesIO()
@@ -52,10 +54,7 @@ def generate_totp_config_svg(device, issuer, label):
 
 def generate_totp_config_svg_for_device(request, device):
     issuer = get_current_site(request).name
-    label = '{issuer}: {username}'.format(
-        issuer=issuer,
-        username=request.user.get_username()
-    )
+    label = f"{issuer}: {request.user.get_username()}"
     return generate_totp_config_svg(device=device, issuer=issuer, label=label)
 
 

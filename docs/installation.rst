@@ -74,12 +74,12 @@ Finally, you must include the django-allauth-2fa URLs:
 
 .. code-block:: python
 
-    from django.conf.urls import include, url
+    from django.urls import include, path
 
     urlpatterns = [
         # Include the allauth and 2FA urls from their respective packages.
-        url(r'^', include('allauth_2fa.urls')),
-        url(r'^', include('allauth.urls')),
+        path('accounts/two-factor/', include('allauth_2fa.urls')),
+        path('accounts/', include('allauth.urls')),
     ]
 
 .. warning::

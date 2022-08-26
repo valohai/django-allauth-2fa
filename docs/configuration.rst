@@ -4,7 +4,7 @@ Configuration
 ``ALLAUTH_2FA_TEMPLATE_EXTENSION``
 ----------------------------------
 
-ALlows you to override the extension for the templates used by the internal
+Allows you to override the extension for the templates used by the internal
 views of django-allauth-2fa.
 
 Defaults to ``ACCOUNT_TEMPLATE_EXTENSION`` from allauth, which is ``html`` by
@@ -19,3 +19,13 @@ Whether to always show the remaining backup tokens on the
 Backup Tokens view, or only when they're freshly generated.
 
 Defaults to ``True``.
+
+``ALLAUTH_2FA_REMOVE_SUCCESS_URL``
+-----------------------------------
+
+The URL name to redirect to after removing a 2FA device.
+
+``ALLAUTH_2FA_SETUP_SUCCESS_URL``
+----------------------------------
+
+The URL name to redirect to after setting up a 2FA device.

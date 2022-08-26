@@ -2,7 +2,6 @@ from urllib.parse import urlencode
 
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.exceptions import ImmediateHttpResponse
-
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
@@ -19,10 +18,22 @@ class OTPAdapter(DefaultAccountAdapter):
         if self.has_2fa_enabled(user):
             # Cast to string for the case when this is not a JSON serializable
             # object, e.g. a UUID.
-            request.session['allauth_2fa_user_id'] = str(user.id)
+            request.session["allauth_2fa_user_id"] = str(user.id)
+            redirect_url = self.get_2fa_authenticate_url(request)
+            raise ImmediateHttpResponse(response=HttpResponseRedirect(redirect_url))
 
-            redirect_url = reverse('two-factor-authenticate')
-            # Add "next" parameter to the URL.
+        # Otherwise defer to the original allauth adapter.
+        return super().login(request, user)
+
+    def get_2fa_authenticate_url(self, request):
+        """
+        Get the URL to redirect to for finishing 2FA authentication.
+        """
+        redirect_url = reverse("two-factor-authenticate")
+
+        # Add "next" parameter to the URL if possible.
+        # If the view function smells like a class-based view, we can interrogate it.
+        if getattr(request.resolver_match.func, "view_class", None):
             view = request.resolver_match.func.view_class()
             view.request = request
             success_url = view.get_success_url()
@@ -30,11 +41,6 @@ class OTPAdapter(DefaultAccountAdapter):
             if success_url:
                 query_params[view.redirect_field_name] = success_url
             if query_params:
-                redirect_url += '?' + urlencode(query_params)
+                redirect_url += f"?{urlencode(query_params)}"
 
-            raise ImmediateHttpResponse(
-                response=HttpResponseRedirect(redirect_url)
-            )
-
-        # Otherwise defer to the original allauth adapter.
-        return super(OTPAdapter, self).login(request, user)
+        return redirect_url

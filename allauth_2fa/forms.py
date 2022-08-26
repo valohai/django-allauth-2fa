@@ -1,10 +1,19 @@
-from django import forms
-from django.utils.translation import gettext_lazy as _
+import contextlib
 
+from django import forms
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext_lazy as _
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from allauth_2fa.utils import reset_device
+
+
+DEFAULT_TOKEN_WIDGET_ATTRS = {
+    "autofocus": "autofocus",
+    "autocomplete": "off",
+    "inputmode": "numeric",
+}
 
 
 class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
@@ -15,12 +24,8 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
     otp_device = forms.CharField(required=False)
 
     def __init__(self, user, **kwargs):
-        super(TOTPAuthenticateForm, self).__init__(**kwargs)
-        self.fields['otp_token'].widget.attrs.update({
-            'autofocus': 'autofocus',
-            'autocomplete': 'off',
-            'inputmode': 'numeric',
-        })
+        super().__init__(**kwargs)
+        self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
         self.user = user
 
     def clean(self):
@@ -36,23 +41,20 @@ class TOTPDeviceForm(forms.Form):
     )
 
     def __init__(self, user, metadata=None, **kwargs):
-        super(TOTPDeviceForm, self).__init__(**kwargs)
-        self.fields['token'].widget.attrs.update({
-            'autofocus': 'autofocus',
-            'autocomplete': 'off',
-        })
+        super().__init__(**kwargs)
+        self.fields["token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
         self.user = user
         self.metadata = metadata or {}
 
     def clean_token(self):
-        token = self.cleaned_data.get('token')
+        token = self.cleaned_data.get("token")
 
         # Find the unconfirmed device and attempt to verify the token.
         self.device = self.user.totpdevice_set.filter(confirmed=False).first()
         if reset_device(self.user.id):
             raise forms.ValidationError(_('The previous QR code expired, scan the new code above'))
         if not self.device.verify_token(token):
-            raise forms.ValidationError(_('The entered token is not valid'))
+            raise forms.ValidationError(_("The entered token is not valid"))
 
         return token
 
@@ -68,15 +70,33 @@ class TOTPDeviceForm(forms.Form):
 
 class TOTPDeviceRemoveForm(forms.Form):
 
+    # User must input a valid token so 2FA can be removed
+    token = forms.CharField(
+        label=_("Token"),
+    )
+
     def __init__(self, user, **kwargs):
-        super(TOTPDeviceRemoveForm, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.user = user
+        self.fields["token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
+
+    def clean_token(self):
+        # Ensure that the user has provided a valid token
+        token = self.cleaned_data.get("token")
+
+        # Verify that the user has provided a valid token
+        for device in self.user.totpdevice_set.filter(confirmed=True):
+            if device.verify_token(token):
+                return token
+
+        raise forms.ValidationError(_("The entered token is not valid"))
 
     def save(self):
-        # Delete any backup tokens.
-        static_device = self.user.staticdevice_set.get(name='backup')
-        static_device.token_set.all().delete()
-        static_device.delete()
+        with contextlib.suppress(ObjectDoesNotExist):
+            # Delete any backup tokens and their related static device.
+            static_device = self.user.staticdevice_set.get(name="backup")
+            static_device.token_set.all().delete()
+            static_device.delete()
 
         # Delete TOTP device.
         try:
