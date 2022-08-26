@@ -2,6 +2,7 @@ from base64 import b64encode
 
 from allauth.account.adapter import get_adapter
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
