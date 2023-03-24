@@ -161,7 +161,7 @@ class TwoFactorBackupTokens(ValidTOTPDeviceRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         static_device, _ = self.request.user.staticdevice_set.get_or_create(
-            name="backup"
+            name="backup",
         )
 
         if static_device:

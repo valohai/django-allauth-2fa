@@ -18,7 +18,7 @@ class AllauthTwoFactorMiddleware(MiddlewareMixin):
     def process_request(self, request):
         match = resolve(request.path)
         if not match.url_name or not match.url_name.startswith(
-            "two-factor-authenticate"
+            "two-factor-authenticate",
         ):
             try:
                 del request.session["allauth_2fa_user_id"]

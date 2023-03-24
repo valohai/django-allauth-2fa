@@ -74,7 +74,7 @@ latex_documents = [
 # -- Options for manual page output ---------------------------------------
 
 man_pages = [
-    (master_doc, "django-allauth-2fa", "django-allauth-2fa Documentation", [author], 1)
+    (master_doc, "django-allauth-2fa", "django-allauth-2fa Documentation", [author], 1),
 ]
 
 
