@@ -12,7 +12,7 @@ DATABASES = {
         "TEST": {
             "NAME": ":memory:",
         },
-    }
+    },
 }
 
 ROOT_URLCONF = "tests.urls"

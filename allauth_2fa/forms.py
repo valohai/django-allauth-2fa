@@ -60,7 +60,6 @@ class TOTPDeviceForm(forms.Form):
 
 
 class TOTPDeviceRemoveForm(forms.Form):
-
     # User must input a valid token so 2FA can be removed
     token = forms.CharField(
         label=_("Token"),
