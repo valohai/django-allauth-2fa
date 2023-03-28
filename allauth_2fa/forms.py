@@ -71,9 +71,7 @@ class TOTPDeviceRemoveForm(OTPAuthenticationFormMixin, forms.Form):
     def __init__(self, user, **kwargs):
         super().__init__(**kwargs)
 
-        if self.fields.get("token") or (
-            kwargs.get("data") and "token" in kwargs.get("data")
-        ):
+        if "token" in self.fields or "token" in self.data:
             raise ImproperlyConfigured(
                 "The field `token` in TOTPDeviceRemoveForm has been renamed "
                 "to `otp_token`.",
