@@ -1,9 +1,6 @@
 from base64 import b64encode
 
-from allauth.account import signals
 from allauth.account.adapter import get_adapter
-from allauth.account.utils import get_login_redirect_url
-from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
@@ -16,7 +13,6 @@ from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from allauth_2fa import app_settings
-from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.forms import TOTPAuthenticateForm
 from allauth_2fa.forms import TOTPDeviceForm
 from allauth_2fa.forms import TOTPDeviceRemoveForm
@@ -54,33 +50,10 @@ class TwoFactorAuthenticate(FormView):
 
         """
         adapter = get_adapter(self.request)
-
-        # Skip over the (already done) 2fa login flow and continue the original
-        # allauth login flow.
-        super(OTPAdapter, adapter).login(self.request, form.user)
-
-        # Perform the rest of allauth.account.utils.perform_login, this is
-        # copied from commit cedad9f156a8c78bfbe43a0b3a723c1a0b840dbd.
-
-        # TODO Support redirect_url.
-        response = HttpResponseRedirect(get_login_redirect_url(self.request))
-
-        # TODO Support signal_kwargs.
-        signals.user_logged_in.send(
-            sender=form.user.__class__,
-            request=self.request,
-            response=response,
-            user=form.user,
-        )
-
-        adapter.add_message(
-            self.request,
-            messages.SUCCESS,
-            "account/messages/logged_in.txt",
-            {"user": form.user},
-        )
-
-        return response
+        # 2fa kicked in at `pre_login()`, so we need to continue from there.
+        login_kwargs = adapter.unstash_pending_login_kwargs(self.request)
+        adapter.login(self.request, form.user)
+        return adapter.post_login(self.request, form.user, **login_kwargs)
 
 
 class TwoFactorSetup(LoginRequiredMixin, FormView):
