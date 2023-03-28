@@ -43,7 +43,7 @@ classifiers = [
 
 dependencies = [
     "django-allauth>=0.41.0",
-    "django-otp>=1.0.0",
+    "django-otp>=1.1.0",
     "django>=3.2",
     "qrcode>=5.3",
 ]
