@@ -59,7 +59,7 @@ class TOTPDeviceForm(_TokenToOTPTokenMixin, forms.Form):
         self.user = user
         self.metadata = metadata or {}
 
-    def clean_token(self):
+    def clean_otp_token(self):
         token = self.cleaned_data.get("otp_token")
 
         # Find the unconfirmed device and attempt to verify the token.
