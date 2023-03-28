@@ -90,7 +90,9 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         Get the configuration for generating a QR code.
 
         The fields required are:
-        - `label`: identifies which account a key is associated with. Contains an account name, preferably prefixed by an issuer name and a colon, e.g. `issuer: account`.
+        - `label`: identifies which account a key is associated with. Contains an
+            account name, preferably prefixed by an issuer name and a colon, e.g.
+            `issuer: account`.
         - `issuer`: indicates the provider or service this account is associated with.
         """
 
