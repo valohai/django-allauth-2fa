@@ -12,6 +12,7 @@ from django.test import override_settings
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django_otp.oath import TOTP
+from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
