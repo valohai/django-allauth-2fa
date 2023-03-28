@@ -4,7 +4,6 @@ from urllib.parse import quote
 from urllib.parse import urlencode
 
 import qrcode
-from django.contrib.sites.shortcuts import get_current_site
 from qrcode.image.svg import SvgPathImage
 
 
@@ -27,12 +26,6 @@ def generate_totp_config_svg(device, issuer, label):
     io = BytesIO()
     img.save(io)
     return io.getvalue()
-
-
-def generate_totp_config_svg_for_device(request, device):
-    issuer = get_current_site(request).name
-    label = f"{issuer}: {request.user.get_username()}"
-    return generate_totp_config_svg(device=device, issuer=issuer, label=label)
 
 
 def user_has_valid_totp_device(user):
