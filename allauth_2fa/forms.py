@@ -94,3 +94,10 @@ class TOTPDeviceRemoveForm(OTPAuthenticationFormMixin, forms.Form):
         # Delete TOTP device.
         device = TOTPDevice.objects.get(user=self.user)
         device.delete()
+
+    @property
+    def token(self):
+        raise ImproperlyConfigured(
+            "The field `token` in TOTPDeviceRemoveForm has been renamed "
+            "to `otp_token`.",
+        )
