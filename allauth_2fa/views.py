@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from base64 import b64encode
 
 from allauth.account.adapter import get_adapter
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -17,7 +20,7 @@ from allauth_2fa.forms import TOTPAuthenticateForm
 from allauth_2fa.forms import TOTPDeviceForm
 from allauth_2fa.forms import TOTPDeviceRemoveForm
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
-from allauth_2fa.utils import generate_totp_config_svg_for_device
+from allauth_2fa.utils import generate_totp_config_svg
 from allauth_2fa.utils import get_device_base32_secret
 from allauth_2fa.utils import user_has_valid_totp_device
 
@@ -84,8 +87,29 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         self._new_device()
         return super().get(request, *args, **kwargs)
 
+    def get_qr_code_kwargs(self) -> dict[str, str]:
+        """
+        Get the configuration for generating a QR code.
+
+        The fields required are:
+        - `label`: identifies which account a key is associated with. Contains an
+            account name, preferably prefixed by an issuer name and a colon, e.g.
+            `issuer: account`.
+        - `issuer`: indicates the provider or service this account is associated with.
+        """
+
+        issuer = get_current_site(self.request).name
+
+        return {
+            "issuer": issuer,
+            "label": f"{issuer}: {self.request.user.get_username()}",
+        }
+
     def get_qr_code_data_uri(self):
-        svg_data = generate_totp_config_svg_for_device(self.request, self.device)
+        svg_data = generate_totp_config_svg(
+            device=self.device,
+            **self.get_qr_code_kwargs(),
+        )
         return f"data:image/svg+xml;base64,{force_str(b64encode(svg_data))}"
 
     def get_context_data(self, **kwargs):
