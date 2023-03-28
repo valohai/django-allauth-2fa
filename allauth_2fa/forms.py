@@ -16,6 +16,22 @@ DEFAULT_TOKEN_WIDGET_ATTRS = {
 }
 
 
+class _TokenToOTPTokenMixin:
+    exception = ImproperlyConfigured(
+        "The field `token` in TOTPDeviceRemoveForm has been renamed " "to `otp_token`.",
+    )
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        if "token" in self.fields or "token" in self.data:
+            raise self.exception
+
+    @property
+    def token(self):
+        raise self.exception
+
+
 class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
     otp_token = forms.CharField(
         label=_("Token"),
@@ -31,19 +47,19 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
         return self.cleaned_data
 
 
-class TOTPDeviceForm(forms.Form):
-    token = forms.CharField(
+class TOTPDeviceForm(_TokenToOTPTokenMixin, forms.Form):
+    otp_token = forms.CharField(
         label=_("Token"),
     )
 
     def __init__(self, user, metadata=None, **kwargs):
         super().__init__(**kwargs)
-        self.fields["token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
+        self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
         self.user = user
         self.metadata = metadata or {}
 
     def clean_token(self):
-        token = self.cleaned_data.get("token")
+        token = self.cleaned_data.get("otp_token")
 
         # Find the unconfirmed device and attempt to verify the token.
         self.device = self.user.totpdevice_set.filter(confirmed=False).first()
@@ -62,7 +78,11 @@ class TOTPDeviceForm(forms.Form):
         return self.device
 
 
-class TOTPDeviceRemoveForm(OTPAuthenticationFormMixin, forms.Form):
+class TOTPDeviceRemoveForm(
+    _TokenToOTPTokenMixin,
+    OTPAuthenticationFormMixin,
+    forms.Form,
+):
     # User must input a valid token so 2FA can be removed
     otp_token = forms.CharField(
         label=_("Token"),
@@ -94,10 +114,3 @@ class TOTPDeviceRemoveForm(OTPAuthenticationFormMixin, forms.Form):
         # Delete TOTP device.
         device = TOTPDevice.objects.get(user=self.user)
         device.delete()
-
-    @property
-    def token(self):
-        raise ImproperlyConfigured(
-            "The field `token` in TOTPDeviceRemoveForm has been renamed "
-            "to `otp_token`.",
-        )
