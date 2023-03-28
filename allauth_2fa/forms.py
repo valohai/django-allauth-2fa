@@ -17,19 +17,18 @@ DEFAULT_TOKEN_WIDGET_ATTRS = {
 
 
 class _TokenToOTPTokenMixin:
-    exception = ImproperlyConfigured(
-        "The field `token` in TOTPDeviceRemoveForm has been renamed " "to `otp_token`.",
-    )
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         if "token" in self.fields or "token" in self.data:
-            raise self.exception
+            self._raise_token_exception()
 
     @property
     def token(self):
-        raise self.exception
+        self._raise_token_exception()
+        
+    def _raise_token_exception(self):
+        raise ImproperlyConfigured(f"The field `token` in {self} has been renamed to `otp_token`.")
 
 
 class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
