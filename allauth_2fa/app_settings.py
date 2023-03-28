@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from allauth.account import app_settings as allauth_settings
 from django.conf import settings
 

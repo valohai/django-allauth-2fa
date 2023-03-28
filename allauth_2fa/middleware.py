@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from allauth.account.adapter import get_adapter
 from django.conf import settings
 from django.contrib import messages

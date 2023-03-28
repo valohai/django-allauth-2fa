@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from base64 import b32encode
 from io import BytesIO
-from urllib.parse import quote
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import qrcode
 from qrcode.image.svg import SvgPathImage
