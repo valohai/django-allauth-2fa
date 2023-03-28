@@ -91,10 +91,7 @@ class TOTPDeviceRemoveForm(
         super().__init__(**kwargs)
 
         if "token" in self.fields or "token" in self.data:
-            raise ImproperlyConfigured(
-                "The field `token` in TOTPDeviceRemoveForm has been renamed "
-                "to `otp_token`.",
-            )
+            self. _raise_token_exception()
 
         self.user = user
         self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
