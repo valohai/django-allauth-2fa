@@ -91,9 +91,6 @@ class TOTPDeviceRemoveForm(
     def __init__(self, user, **kwargs):
         super().__init__(**kwargs)
 
-        if "token" in self.fields or "token" in self.data:
-            self._raise_token_exception()
-
         self.user = user
         self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
 
