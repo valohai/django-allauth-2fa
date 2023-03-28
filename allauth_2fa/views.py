@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from base64 import b64encode
 
 from allauth.account.adapter import get_adapter
