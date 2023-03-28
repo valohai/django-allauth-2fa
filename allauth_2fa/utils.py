@@ -4,15 +4,14 @@ from urllib.parse import quote
 from urllib.parse import urlencode
 
 import qrcode
-from django.contrib.sites.shortcuts import get_current_site
 from qrcode.image.svg import SvgPathImage
 
 
-def get_device_base32_secret(device):
+def get_device_base32_secret(device) -> str:
     return b32encode(device.bin_key).decode("utf-8")
 
 
-def generate_totp_config_svg(device, issuer, label):
+def generate_totp_config_svg(device, *, issuer: str, label: str) -> bytes:
     params = {
         "secret": get_device_base32_secret(device),
         "algorithm": "SHA1",
@@ -29,9 +28,7 @@ def generate_totp_config_svg(device, issuer, label):
     return io.getvalue()
 
 
-def generate_totp_config_svg_for_device(request, device):
-    issuer = get_current_site(request).name
-    label = f"{issuer}: {request.user.get_username()}"
+def generate_totp_config_svg_for_device(device, *, issuer: str, label: str) -> bytes:
     return generate_totp_config_svg(device=device, issuer=issuer, label=label)
 
 

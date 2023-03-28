@@ -85,7 +85,11 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         return super().get(request, *args, **kwargs)
 
     def get_qr_code_data_uri(self):
-        svg_data = generate_totp_config_svg_for_device(self.request, self.device)
+        svg_data = generate_totp_config_svg_for_device(
+            self.device,
+            issuer=self.get_otp_config_issuer(),
+            label=self.get_otp_config_label(),
+        )
         return f"data:image/svg+xml;base64,{force_str(b64encode(svg_data))}"
 
     def get_context_data(self, **kwargs):
@@ -108,6 +112,20 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         # If the confirmation code was wrong, generate a new device.
         self._new_device()
         return super().form_invalid(form)
+
+    def get_otp_config_issuer(self) -> str:
+        """
+        Get the `issuer` for the OTP configuration.
+        """
+        from django.contrib.sites.shortcuts import get_current_site
+
+        return get_current_site(self.request).name
+
+    def get_otp_config_label(self) -> str:
+        """
+        Get the user-facing label for the OTP configuration.
+        """
+        return f"{self.get_otp_config_issuer()}: {self.request.user.get_username()}"
 
 
 class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
