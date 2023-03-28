@@ -1,6 +1,6 @@
+from __future__ import annotations
+
 from typing import Callable
-from typing import Optional
-from typing import Tuple
 from unittest.mock import Mock
 
 import pytest
@@ -48,7 +48,7 @@ def adapter(request, settings):
 
 
 @pytest.fixture()
-def john() -> "AbstractUser":
+def john() -> AbstractUser:
     user = get_user_model().objects.create(username="john")
     user.set_password("doe")
     user.save()
@@ -56,7 +56,7 @@ def john() -> "AbstractUser":
 
 
 @pytest.fixture()
-def john_with_totp(john: AbstractUser) -> Tuple[AbstractUser, TOTPDevice, StaticDevice]:
+def john_with_totp(john: AbstractUser) -> tuple[AbstractUser, TOTPDevice, StaticDevice]:
     totp_model = john.totpdevice_set.create()
     static_model = john.staticdevice_set.create()
     static_model.token_set.create(token=StaticToken.random_token())
@@ -75,7 +75,7 @@ def user_logged_in_count(request) -> Callable[[], int]:
     return get_login_count
 
 
-def login(client, *, expected_redirect_url: Optional[str], credentials=None):
+def login(client, *, expected_redirect_url: str | None = None, credentials=None):
     if credentials is None:
         credentials = JOHN_CREDENTIALS
     resp = client.post(LOGIN_URL, credentials)
@@ -96,13 +96,40 @@ def do_totp_authentication(
     client,
     totp_device: TOTPDevice,
     *,
-    expected_redirect_url: Optional[str],
+    expected_redirect_url: str | None,
     auth_url: str = TWO_FACTOR_AUTH_URL,
 ):
     token = get_token_from_totp_device(totp_device)
     resp = client.post(auth_url, {"otp_token": token})
     if expected_redirect_url:
         assertRedirects(resp, expected_redirect_url, fetch_redirect_response=False)
+
+
+@pytest.mark.parametrize("token_state", ["none", "correct", "incorrect"])
+def test_setup_2fa(client, john, token_state):
+    """Test that the setup view works."""
+    assert not john.totpdevice_set.exists()
+    client.force_login(john)
+    resp = client.get(TWO_FACTOR_SETUP_URL)
+
+    assert john.totpdevice_set.exists()
+
+    if token_state == "correct":
+        totp_device = john.totpdevice_set.first()
+        totp_device.throttle_reset()
+        form_data = {
+            "otp_token": get_token_from_totp_device(totp_device),
+        }
+    elif token_state == "incorrect":
+        form_data = {"otp_token": "hernekeitto"}
+    else:
+        form_data = {}
+
+    client.post(TWO_FACTOR_SETUP_URL, form_data)
+    assert resp.status_code == 200
+
+    device_confirmed = john.totpdevice_set.first().confirmed
+    assert device_confirmed == (token_state == "correct")
 
 
 def test_standard_login(client, john, user_logged_in_count):
