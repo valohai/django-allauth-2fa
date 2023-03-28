@@ -55,7 +55,7 @@ def john() -> "AbstractUser":
 
 
 @pytest.fixture()
-def john_with_totp(john: AbstractUser) -> Tuple[AbstractUser, TOTPDevice]:
+def john_with_totp(john: AbstractUser) -> Tuple[AbstractUser, TOTPDevice, StaticDevice]:
     totp_model = john.totpdevice_set.create()
     static_model = john.staticdevice_set.create()
     static_model.token_set.create(token=StaticToken.random_token())
