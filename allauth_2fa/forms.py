@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 
 from django import forms
@@ -23,7 +25,7 @@ class TOTPAuthenticateForm(OTPAuthenticationFormMixin, forms.Form):
         self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
         self.user = user
 
-    def clean(self):
+    def clean(self) -> dict:
         self.clean_otp(self.user)
         return self.cleaned_data
 
@@ -49,7 +51,7 @@ class TOTPDeviceForm(forms.Form):
 
         return token
 
-    def save(self):
+    def save(self) -> TOTPDevice:
         # The device was found to be valid, delete other confirmed devices and
         # confirm the new device.
         self.user.totpdevice_set.filter(confirmed=True).delete()
@@ -81,7 +83,7 @@ class TOTPDeviceRemoveForm(forms.Form):
 
         raise forms.ValidationError(_("The entered token is not valid"))
 
-    def save(self):
+    def save(self) -> None:
         with contextlib.suppress(ObjectDoesNotExist):
             # Delete any backup tokens and their related static device.
             static_device = self.user.staticdevice_set.get(name="backup")

@@ -10,19 +10,18 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
-from django.views.generic import FormView
-from django.views.generic import TemplateView
+from django.views.generic import FormView, TemplateView
 from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from allauth_2fa import app_settings
-from allauth_2fa.forms import TOTPAuthenticateForm
-from allauth_2fa.forms import TOTPDeviceForm
-from allauth_2fa.forms import TOTPDeviceRemoveForm
+from allauth_2fa.forms import TOTPAuthenticateForm, TOTPDeviceForm, TOTPDeviceRemoveForm
 from allauth_2fa.mixins import ValidTOTPDeviceRequiredMixin
-from allauth_2fa.utils import generate_totp_config_svg
-from allauth_2fa.utils import get_device_base32_secret
-from allauth_2fa.utils import user_has_valid_totp_device
+from allauth_2fa.utils import (
+    generate_totp_config_svg,
+    get_device_base32_secret,
+    user_has_valid_totp_device,
+)
 
 
 class TwoFactorAuthenticate(FormView):

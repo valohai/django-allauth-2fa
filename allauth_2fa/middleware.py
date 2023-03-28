@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from allauth.account.adapter import get_adapter
 from django.conf import settings
 from django.contrib import messages
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import resolve
 from django.utils.deprecation import MiddlewareMixin
@@ -15,7 +18,7 @@ class AllauthTwoFactorMiddleware(MiddlewareMixin):
 
     """
 
-    def process_request(self, request):
+    def process_request(self, request: HttpRequest) -> None:
         match = resolve(request.path)
         if not match.url_name or not match.url_name.startswith(
             "two-factor-authenticate",
@@ -49,7 +52,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
         "You must enable two-factor authentication before doing anything else."
     )
 
-    def on_require_2fa(self, request):
+    def on_require_2fa(self, request: HttpRequest) -> HttpResponse:
         """
         If the current request requires 2FA and the user does not have it
         enabled, this is executed. The result of this is returned from the
@@ -74,7 +77,7 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
         # Redirect user to two-factor setup page.
         return redirect("two-factor-setup")
 
-    def require_2fa(self, request):
+    def require_2fa(self, request: HttpRequest) -> bool:
         """
         Check if this request is required to have 2FA before accessing the app.
 
@@ -85,25 +88,31 @@ class BaseRequire2FAMiddleware(MiddlewareMixin):
         """
         raise NotImplementedError("You must implement require_2fa.")
 
-    def is_allowed_page(self, request):
+    def is_allowed_page(self, request: HttpRequest) -> bool:
         return request.resolver_match.url_name in self.allowed_pages
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
+    def process_view(
+        self,
+        request: HttpRequest,
+        view_func,
+        view_args,
+        view_kwargs,
+    ) -> HttpResponse | None:
         # The user is not logged in, do nothing.
         if request.user.is_anonymous:
-            return
+            return None
 
         # If this doesn't require 2FA, then stop processing.
         if not self.require_2fa(request):
-            return
+            return None
 
         # If the user is on one of the allowed pages, do nothing.
         if self.is_allowed_page(request):
-            return
+            return None
 
         # User already has two-factor configured, do nothing.
         if get_adapter(request).has_2fa_enabled(request.user):
-            return
+            return None
 
         # The request required 2FA but it isn't configured!
         return self.on_require_2fa(request)
