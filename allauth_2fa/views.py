@@ -85,14 +85,13 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         self._new_device()
         return super().get(request, *args, **kwargs)
 
-    def get_qr_code_kwargs(self):
-        """Keyword arguments to give to the QR code function.
+    def get_qr_code_kwargs(self) -> dict[str, str]:
+        """
+        Get the configuration for generating a QR code.
 
-        This is a separate method so that it can be overridden if needed.
-
-        The fields are:
-        - issuer: The name of the site (e.g. "example.com")
-        - label: The label for the QR code (e.g. "example.com: username")
+        The fields required are:
+        - `label`: identifies which account a key is associated with. Contains an account name, preferably prefixed by an issuer name and a colon, e.g. `issuer: account`.
+        - `issuer`: indicates the provider or service this account is associated with.
         """
 
         issuer = get_current_site(self.request).name
