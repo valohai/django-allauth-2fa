@@ -29,7 +29,7 @@
 <form method="post">
   {% csrf_token %}
   {{ form.non_field_errors }}
-  {{ form.token.label }}: {{ form.token }}
+  {{ form.otp_token.label }}: {{ form.otp_token }}
 
   <button type="submit">
     {% trans 'Verify' %}

@@ -1,6 +1,6 @@
+from __future__ import annotations
+
 from typing import Callable
-from typing import Optional
-from typing import Tuple
 from unittest.mock import Mock
 
 import pytest
@@ -12,6 +12,8 @@ from django.test import override_settings
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django_otp.oath import TOTP
+from django_otp.plugins.otp_static.models import StaticDevice
+from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
 
@@ -46,7 +48,7 @@ def adapter(request, settings):
 
 
 @pytest.fixture()
-def john() -> "AbstractUser":
+def john() -> AbstractUser:
     user = get_user_model().objects.create(username="john")
     user.set_password("doe")
     user.save()
@@ -54,9 +56,11 @@ def john() -> "AbstractUser":
 
 
 @pytest.fixture()
-def john_with_totp(john: AbstractUser) -> Tuple[AbstractUser, TOTPDevice]:
+def john_with_totp(john: AbstractUser) -> tuple[AbstractUser, TOTPDevice, StaticDevice]:
     totp_model = john.totpdevice_set.create()
-    return (john, totp_model)
+    static_model = john.staticdevice_set.create()
+    static_model.token_set.create(token=StaticToken.random_token())
+    return john, totp_model, static_model
 
 
 @pytest.fixture()
@@ -71,7 +75,7 @@ def user_logged_in_count(request) -> Callable[[], int]:
     return get_login_count
 
 
-def login(client, *, expected_redirect_url: Optional[str], credentials=None):
+def login(client, *, expected_redirect_url: str | None = None, credentials=None):
     if credentials is None:
         credentials = JOHN_CREDENTIALS
     resp = client.post(LOGIN_URL, credentials)
@@ -92,13 +96,40 @@ def do_totp_authentication(
     client,
     totp_device: TOTPDevice,
     *,
-    expected_redirect_url: Optional[str],
+    expected_redirect_url: str | None,
     auth_url: str = TWO_FACTOR_AUTH_URL,
 ):
     token = get_token_from_totp_device(totp_device)
     resp = client.post(auth_url, {"otp_token": token})
     if expected_redirect_url:
         assertRedirects(resp, expected_redirect_url, fetch_redirect_response=False)
+
+
+@pytest.mark.parametrize("token_state", ["none", "correct", "incorrect"])
+def test_setup_2fa(client, john, token_state):
+    """Test that the setup view works."""
+    assert not john.totpdevice_set.exists()
+    client.force_login(john)
+    resp = client.get(TWO_FACTOR_SETUP_URL)
+
+    assert john.totpdevice_set.exists()
+
+    if token_state == "correct":
+        totp_device = john.totpdevice_set.first()
+        totp_device.throttle_reset()
+        form_data = {
+            "otp_token": get_token_from_totp_device(totp_device),
+        }
+    elif token_state == "incorrect":
+        form_data = {"otp_token": "hernekeitto"}
+    else:
+        form_data = {}
+
+    client.post(TWO_FACTOR_SETUP_URL, form_data)
+    assert resp.status_code == 200
+
+    device_confirmed = john.totpdevice_set.first().confirmed
+    assert device_confirmed == (token_state == "correct")
 
 
 def test_standard_login(client, john, user_logged_in_count):
@@ -111,7 +142,7 @@ def test_standard_login(client, john, user_logged_in_count):
 
 def test_2fa_login(client, john_with_totp, user_logged_in_count):
     """Test login behavior when 2FA is configured."""
-    user, totp_device = john_with_totp
+    user, totp_device, static_device = john_with_totp
     login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
 
     # Ensure no signal is received yet.
@@ -182,10 +213,10 @@ def test_2fa_reset_flow(client, john_with_totp, target_url):
     assertRedirects(resp, LOGIN_URL, fetch_redirect_response=False)
 
 
-@pytest.mark.parametrize("token_state", ["none", "correct", "incorrect"])
+@pytest.mark.parametrize("token_state", ["none", "correct", "static", "incorrect"])
 def test_2fa_removal(client, john_with_totp, token_state):
     """Removing 2FA should be possible with a correct token."""
-    user, totp_device = john_with_totp
+    user, totp_device, static_device = john_with_totp
     login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
     do_totp_authentication(
         client,
@@ -200,9 +231,11 @@ def test_2fa_removal(client, john_with_totp, token_state):
     if token_state == "correct":
         # reset throttling and get another token
         totp_device.throttle_reset()
-        form_data = {"token": get_token_from_totp_device(totp_device)}
+        form_data = {"otp_token": get_token_from_totp_device(totp_device)}
+    elif token_state == "static":
+        form_data = {"otp_token": static_device.token_set.first().token}
     elif token_state == "incorrect":
-        form_data = {"token": "hernekeitto"}
+        form_data = {"otp_token": "hernekeitto"}
     else:
         form_data = {}
 
@@ -211,7 +244,7 @@ def test_2fa_removal(client, john_with_totp, token_state):
 
     # The only case when the TOTP device should be removed is when the token is correct.
     was_removed = not user.totpdevice_set.exists()
-    assert was_removed == (token_state == "correct")
+    assert was_removed == (token_state == "correct" or token_state == "static")
 
 
 @pytest.mark.parametrize("next_via", ["get", "post"])
