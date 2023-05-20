@@ -3,6 +3,7 @@ from __future__ import annotations
 from base64 import b64encode
 
 from allauth.account.adapter import get_adapter
+from allauth.utils import get_form_class
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
@@ -37,6 +38,9 @@ class TwoFactorAuthenticate(FormView):
             # to include the next parameter.
             return redirect("account_login")
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form_class(self):
+        return get_form_class(app_settings.FORMS, "authenticate", self.form_class)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -117,6 +121,9 @@ class TwoFactorSetup(LoginRequiredMixin, FormView):
         context["secret"] = get_device_base32_secret(self.device)
         return context
 
+    def get_form_class(self):
+        return get_form_class(app_settings.FORMS, "setup", self.form_class)
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
@@ -137,6 +144,9 @@ class TwoFactorRemove(ValidTOTPDeviceRequiredMixin, FormView):
     template_name = f"allauth_2fa/remove.{app_settings.TEMPLATE_EXTENSION}"
     form_class = TOTPDeviceRemoveForm
     success_url = reverse_lazy(app_settings.REMOVE_SUCCESS_URL)
+
+    def get_form_class(self):
+        return get_form_class(app_settings.FORMS, "remove", self.form_class)
 
     def form_valid(self, form):
         form.save()
