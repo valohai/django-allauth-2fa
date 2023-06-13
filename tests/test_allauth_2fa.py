@@ -19,7 +19,8 @@ from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
 
-from allauth_2fa import app_settings, views
+from allauth_2fa import app_settings
+from allauth_2fa import views
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
 from . import forms as forms_overrides
