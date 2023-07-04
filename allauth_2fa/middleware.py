@@ -3,7 +3,8 @@ from __future__ import annotations
 from allauth.account.adapter import get_adapter
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import resolve
 from django.utils.deprecation import MiddlewareMixin

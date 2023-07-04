@@ -1,4 +1,6 @@
-from allauth_2fa.forms import TOTPAuthenticateForm, TOTPDeviceForm, TOTPDeviceRemoveForm
+from allauth_2fa.forms import TOTPAuthenticateForm
+from allauth_2fa.forms import TOTPDeviceForm
+from allauth_2fa.forms import TOTPDeviceRemoveForm
 
 
 class CustomTOTPAuthenticateForm(TOTPAuthenticateForm):

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from django.contrib.auth.mixins import AccessMixin
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 
 from allauth_2fa.utils import user_has_valid_totp_device
