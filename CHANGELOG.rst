@@ -3,6 +3,39 @@
 Changelog
 #########
 
+0.11.0 - July 4, 2023
+=====================
+
+We didn't wait one year from the last release for this on purpose, I swear!
+
+Minimum dependency versions
+---------------------------
+
+* The minimum version of Python for this release is 3.7.
+* The minimum version of Django for this release is 3.2.
+* The minimum version of django-otp for this release is 1.1.x.
+* The minimum version of django-allauth for this release is 0.53.0.
+
+Possibly breaking changes
+-------------------------
+
+* The `token` field in forms is now `otp_token`; if you have subclassed forms,
+  or are using custom templates, this may require adjustment.
+
+New features
+------------
+
+* Allow customizing view success URLs via app_settings
+* Show secret on setup page to allow for non-QR-code devices
+* You can customize the QR code generation arguments in TwoFactorSetup (#156)
+* 2FA can be disabled using backup tokens (#155)
+* You can now override the forms used by the views using settings, like allauth does (#161)
+
+Infrastructure
+--------------
+
+* The package now has (partial) type annotations.
+
 0.10.0 - July 4, 2022
 =====================
 
