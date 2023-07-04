@@ -10,17 +10,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.forms import BaseForm
 from django.test import override_settings
-from django.urls import reverse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic.edit import FormMixin
 from django_otp.oath import TOTP
-from django_otp.plugins.otp_static.models import StaticDevice
-from django_otp.plugins.otp_static.models import StaticToken
+from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
 
-from allauth_2fa import app_settings
-from allauth_2fa import views
+from allauth_2fa import app_settings, views
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
 from . import forms as forms_overrides
