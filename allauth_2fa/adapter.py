@@ -6,7 +6,9 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.models import SocialLogin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from allauth_2fa.utils import user_has_valid_totp_device

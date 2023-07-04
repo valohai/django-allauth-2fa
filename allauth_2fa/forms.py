@@ -3,7 +3,8 @@ from __future__ import annotations
 import contextlib
 
 from django import forms
-from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice

@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.urls import include, path
+from django.urls import include
+from django.urls import path
 
 
 def blank_view(request):
