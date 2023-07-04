@@ -8,16 +8,22 @@ from allauth.account.signals import user_logged_in
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+from django.forms import BaseForm
 from django.test import override_settings
 from django.urls import reverse
 from django.urls import reverse_lazy
+from django.views.generic.edit import FormMixin
 from django_otp.oath import TOTP
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
 
+from allauth_2fa import app_settings
+from allauth_2fa import views
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
+
+from . import forms as forms_overrides
 
 ADAPTER_CLASSES = [
     "allauth_2fa.adapter.OTPAdapter",
@@ -338,3 +344,31 @@ def test_require_2fa_middleware(client, john, settings, with_messages):
         # (In particular, see that the last redirect brought us to the 2FA setup page.)
         assert resp.redirect_chain[-1][0] == TWO_FACTOR_SETUP_URL
         # TODO: check messages?
+
+
+@pytest.mark.parametrize(
+    ("settings_key", "custom_form_cls", "view_cls"),
+    [
+        (
+            "authenticate",
+            forms_overrides.CustomTOTPAuthenticateForm,
+            views.TwoFactorAuthenticate,
+        ),
+        ("setup", forms_overrides.CustomTOTPDeviceForm, views.TwoFactorSetup),
+        ("remove", forms_overrides.CustomTOTPDeviceRemoveForm, views.TwoFactorRemove),
+    ],
+)
+def test_forms_override(
+    monkeypatch: pytest.MonkeyPatch,
+    settings_key: str,
+    custom_form_cls: type[BaseForm],
+    view_cls: type[FormMixin[BaseForm]],
+) -> None:
+    view = view_cls()
+    assert view.get_form_class() is view.form_class
+    monkeypatch.setitem(
+        app_settings.FORMS,
+        settings_key,
+        f"{custom_form_cls.__module__}.{custom_form_cls.__qualname__}",
+    )
+    assert view.get_form_class() is custom_form_cls

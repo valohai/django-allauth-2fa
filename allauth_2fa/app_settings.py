@@ -24,3 +24,5 @@ SETUP_SUCCESS_URL = getattr(
     "ALLAUTH_2FA_SETUP_SUCCESS_URL",
     "two-factor-backup-tokens",
 )
+
+FORMS = getattr(settings, "ALLAUTH_2FA_FORMS", {})

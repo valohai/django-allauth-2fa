@@ -29,3 +29,15 @@ The URL name to redirect to after removing a 2FA device.
 ----------------------------------
 
 The URL name to redirect to after setting up a 2FA device.
+
+``ALLAUTH_2FA_FORMS``
+----------------------------------
+
+Used to override forms, for example:
+``{'authenticate': 'myapp.forms.TOTPAuthenticateForm'}``
+
+Possible keys (and default values):
+
+* ``authenticate``: :class:`allauth_2fa.forms.TOTPAuthenticateForm`
+* ``setup``: :class:`allauth_2fa.forms.TOTPDeviceForm`
+* ``remove``: :class:`allauth_2fa.forms.TOTPDeviceRemoveForm`
