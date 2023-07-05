@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Adds two factor authentication to django-allauth"
 readme = "README.rst"
 license = "Apache-2.0"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 authors = [
     { name = "Víðir Valberg Guðmundsson", email = "valberg@orn.li" },
 ]
@@ -27,12 +27,11 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
     "Framework :: Django",
-    "Framework :: Django :: 3.2",
-    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -43,8 +42,8 @@ classifiers = [
 
 dependencies = [
     "django-allauth>=0.53.0",
-    "django-otp>=1.1.0",
-    "django>=3.2",
+    "django-otp>=1.2.0",
+    "django>=4.1",
     "qrcode>=5.3",
 ]
 
@@ -60,7 +59,7 @@ include = [
 ]
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 exclude = [
     ".git",
     ".tox",
