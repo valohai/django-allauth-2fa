@@ -27,8 +27,8 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Web Environment",
     "Framework :: Django",
-    "Framework :: Django :: 3.2",
-    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
+    "Framework :: Django :: 4.2",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
@@ -43,7 +43,7 @@ classifiers = [
 dependencies = [
     "django-allauth>=0.53.0",
     "django-otp>=1.1.0",
-    "django>=3.2",
+    "django>=4.1",
     "qrcode>=5.3",
 ]
 
