@@ -65,6 +65,27 @@ django-allauth-2fa useful!
 #. Send a pull request and bug the maintainer until it gets merged and
    published.
 
+Start contributing
+''''''''''''''''''
+Start by cloning the project with:
+
+.. code-block:: bash
+
+    git clone https://github.com/valohai/django-allauth-2fa.git
+
+The project uses `hatch`_ for building and package management.
+If you don't have hatch installed, you can do so by running:
+
+.. code-block:: bash
+
+    pip install hatch
+
+Setup you virtual environment with hatch:
+
+.. code-block:: bash
+
+    hatch env create
+
 Running tests
 '''''''''''''
 
@@ -72,8 +93,7 @@ Tests can be run using [pytest](https://docs.pytest.org/en/6.2.x/).
 
 .. code-block:: bash
 
-    pip install -r requirements-test.txt
-    py.test
+    hatch run pytest
 
 Running the test project
 ''''''''''''''''''''''''
@@ -82,14 +102,11 @@ The test project can also be used as a minimal example using the following:
 
 .. code-block:: bash
 
-    # Migrate the SQLite database first.
-    DJANGO_SETTINGS_MODULE=tests.settings python manage.py migrate
-    # Run the server with debug.
-    DJANGO_SETTINGS_MODULE=tests.settings python manage.py runserver_plus
-    # Run the shell.
-    DJANGO_SETTINGS_MODULE=tests.settings python manage.py shell_plus
+    hatch run python manage.py migrate
+    hatch run python manage.py runserver
 
 .. _Víðir Valberg Guðmundsson (@valberg): https://github.com/valberg
 .. _Percipient Networks: https://www.strongarm.io
 .. _Valohai: https://valohai.com/
 .. _the repository: http://github.com/valohai/django-allauth-2fa
+.. _hatch: https://hatch.pypa.io/
