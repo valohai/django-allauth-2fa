@@ -3,6 +3,13 @@
 Changelog
 #########
 
+0.12.0 - Unreleased
+===================
+
+New features
+------------
+* Add flag to make the required entry of an otp code for device removal optional (#169)
+
 0.11.0 - July 4, 2023
 =====================
 
