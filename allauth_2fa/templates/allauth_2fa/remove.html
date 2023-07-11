@@ -6,7 +6,9 @@
   {% trans "Disable Two-Factor Authentication" %}
 </h1>
 
-<p>{% trans "Please enter a valid authentication token to disable two-factor authentication:" %}</p>
+{% if form.otp_token %}
+    <p>{% trans "Please enter a valid authentication token to disable two-factor authentication:" %}</p>
+{% endif %}
 
 <form method="post">
   {% csrf_token %}

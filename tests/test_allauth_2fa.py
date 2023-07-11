@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 from unittest.mock import Mock
+from unittest.mock import patch
 
 import pytest
 from allauth.account.signals import user_logged_in
@@ -220,6 +221,7 @@ def test_2fa_reset_flow(client, john_with_totp, target_url):
 
 
 @pytest.mark.parametrize("token_state", ["none", "correct", "static", "incorrect"])
+@patch.object(app_settings, 'REQUIRE_OTP_ON_DEVICE_REMOVAL', new=True)
 def test_2fa_removal(client, john_with_totp, token_state):
     """Removing 2FA should be possible with a correct token."""
     user, totp_device, static_device = john_with_totp
@@ -251,6 +253,28 @@ def test_2fa_removal(client, john_with_totp, token_state):
     # The only case when the TOTP device should be removed is when the token is correct.
     was_removed = not user.totpdevice_set.exists()
     assert was_removed == (token_state == "correct" or token_state == "static")
+
+
+@patch.object(app_settings, 'REQUIRE_OTP_ON_DEVICE_REMOVAL', new=False)
+def test_2fa_removal_without_otp(client, john_with_totp):
+    """Removing 2FA should be possible with a correct token."""
+    user, totp_device, static_device = john_with_totp
+    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
+    do_totp_authentication(
+        client,
+        totp_device=totp_device,
+        expected_redirect_url=settings.LOGIN_REDIRECT_URL,
+    )
+    assert user.totpdevice_set.exists()
+
+    # Navigate to 2FA removal view
+    client.get(reverse("two-factor-remove"))
+    # ... and POST to confirm
+    client.post(reverse("two-factor-remove"), {})
+
+    # The only case when the TOTP device should be removed is when the token is correct.
+    was_removed = not user.totpdevice_set.exists()
+    assert was_removed
 
 
 @pytest.mark.parametrize("next_via", ["get", "post"])
