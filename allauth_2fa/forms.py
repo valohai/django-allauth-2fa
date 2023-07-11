@@ -90,7 +90,8 @@ class TOTPDeviceRemoveForm(
         super().__init__(**kwargs)
 
         self.user = user
-        # user has to enter OTP token to remove device if REQUIRE_OTP_ON_DEVICE_REMOVAL is True
+        # user has to enter OTP token to remove device
+        # if REQUIRE_OTP_ON_DEVICE_REMOVAL is True
         if app_settings.REQUIRE_OTP_ON_DEVICE_REMOVAL:
             self.fields["otp_token"] = forms.CharField(label=_("Token"), required=True)
             self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
