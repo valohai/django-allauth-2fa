@@ -9,6 +9,8 @@ from django.utils.translation import gettext_lazy as _
 from django_otp.forms import OTPAuthenticationFormMixin
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
+from allauth_2fa import app_settings
+
 DEFAULT_TOKEN_WIDGET_ATTRS = {
     "autofocus": "autofocus",
     "autocomplete": "off",
@@ -84,19 +86,20 @@ class TOTPDeviceRemoveForm(
     OTPAuthenticationFormMixin,
     forms.Form,
 ):
-    # User must input a valid token so 2FA can be removed
-    otp_token = forms.CharField(
-        label=_("Token"),
-    )
-
     def __init__(self, user, **kwargs):
         super().__init__(**kwargs)
 
         self.user = user
-        self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
+        # user has to enter OTP token to remove device
+        # if REQUIRE_OTP_ON_DEVICE_REMOVAL is True
+        if app_settings.REQUIRE_OTP_ON_DEVICE_REMOVAL:
+            self.fields["otp_token"] = forms.CharField(label=_("Token"), required=True)
+            self.fields["otp_token"].widget.attrs.update(DEFAULT_TOKEN_WIDGET_ATTRS)
 
     def clean(self):
-        self.clean_otp(self.user)
+        # clean OTP token if REQUIRE_OTP_ON_DEVICE_REMOVAL is True
+        if app_settings.REQUIRE_OTP_ON_DEVICE_REMOVAL:
+            self.clean_otp(self.user)
         return self.cleaned_data
 
     def save(self) -> None:

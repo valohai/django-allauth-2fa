@@ -220,8 +220,11 @@ def test_2fa_reset_flow(client, john_with_totp, target_url):
 
 
 @pytest.mark.parametrize("token_state", ["none", "correct", "static", "incorrect"])
-def test_2fa_removal(client, john_with_totp, token_state):
-    """Removing 2FA should be possible with a correct token."""
+@pytest.mark.parametrize("require_token", [False, True])
+def test_2fa_removal(client, john_with_totp, token_state, require_token, monkeypatch):
+    monkeypatch.setattr(app_settings, "REQUIRE_OTP_ON_DEVICE_REMOVAL", require_token)
+    """Removing 2FA should be possible with a correct token
+    or without one if REQUIRE_OTP_ON_DEVICE_REMOVAL is False."""
     user, totp_device, static_device = john_with_totp
     login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
     do_totp_authentication(
@@ -234,13 +237,13 @@ def test_2fa_removal(client, john_with_totp, token_state):
     # Navigate to 2FA removal view
     client.get(reverse("two-factor-remove"))
 
-    if token_state == "correct":
+    if token_state == "correct" and require_token:
         # reset throttling and get another token
         totp_device.throttle_reset()
         form_data = {"otp_token": get_token_from_totp_device(totp_device)}
-    elif token_state == "static":
+    elif token_state == "static" and require_token:
         form_data = {"otp_token": static_device.token_set.first().token}
-    elif token_state == "incorrect":
+    elif token_state == "incorrect" and require_token:
         form_data = {"otp_token": "hernekeitto"}
     else:
         form_data = {}
@@ -248,9 +251,12 @@ def test_2fa_removal(client, john_with_totp, token_state):
     # ... and POST to confirm
     client.post(reverse("two-factor-remove"), form_data)
 
-    # The only case when the TOTP device should be removed is when the token is correct.
     was_removed = not user.totpdevice_set.exists()
-    assert was_removed == (token_state == "correct" or token_state == "static")
+    if require_token:
+        # TOTP device should only be removed when the token is correct.
+        assert was_removed == (token_state in ["correct", "static"])
+    else:
+        assert was_removed
 
 
 @pytest.mark.parametrize("next_via", ["get", "post"])
