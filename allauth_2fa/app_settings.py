@@ -30,5 +30,5 @@ FORMS = getattr(settings, "ALLAUTH_2FA_FORMS", {})
 REQUIRE_OTP_ON_DEVICE_REMOVAL = getattr(
     settings,
     "ALLAUTH_2FA_REQUIRE_OTP_ON_DEVICE_REMOVAL",
-    True
+    True,
 )

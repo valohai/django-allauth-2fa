@@ -86,9 +86,8 @@ class TOTPDeviceRemoveForm(
     OTPAuthenticationFormMixin,
     forms.Form,
 ):
-
     def __init__(self, user, **kwargs):
-        super(TOTPDeviceRemoveForm, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.user = user
         # user has to enter OTP token to remove device if REQUIRE_OTP_ON_DEVICE_REMOVAL is True

@@ -221,7 +221,7 @@ def test_2fa_reset_flow(client, john_with_totp, target_url):
 
 
 @pytest.mark.parametrize("token_state", ["none", "correct", "static", "incorrect"])
-@patch.object(app_settings, 'REQUIRE_OTP_ON_DEVICE_REMOVAL', new=True)
+@patch.object(app_settings, "REQUIRE_OTP_ON_DEVICE_REMOVAL", new=True)
 def test_2fa_removal(client, john_with_totp, token_state):
     """Removing 2FA should be possible with a correct token."""
     user, totp_device, static_device = john_with_totp
@@ -255,7 +255,7 @@ def test_2fa_removal(client, john_with_totp, token_state):
     assert was_removed == (token_state == "correct" or token_state == "static")
 
 
-@patch.object(app_settings, 'REQUIRE_OTP_ON_DEVICE_REMOVAL', new=False)
+@patch.object(app_settings, "REQUIRE_OTP_ON_DEVICE_REMOVAL", new=False)
 def test_2fa_removal_without_otp(client, john_with_totp):
     """Removing 2FA should be possible with a correct token."""
     user, totp_device, static_device = john_with_totp
