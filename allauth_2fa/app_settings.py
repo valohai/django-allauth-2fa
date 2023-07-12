@@ -3,32 +3,52 @@ from __future__ import annotations
 from allauth.account import app_settings as allauth_settings
 from django.conf import settings
 
-TEMPLATE_EXTENSION = getattr(
-    settings,
-    "ALLAUTH_2FA_TEMPLATE_EXTENSION",
-    allauth_settings.TEMPLATE_EXTENSION,
-)
 
-ALWAYS_REVEAL_BACKUP_TOKENS = bool(
-    getattr(settings, "ALLAUTH_2FA_ALWAYS_REVEAL_BACKUP_TOKENS", True),
-)
+class _AppSettings:
+    @property
+    def TEMPLATE_EXTENSION(self) -> str:
+        return getattr(
+            settings,
+            "ALLAUTH_2FA_TEMPLATE_EXTENSION",
+            allauth_settings.TEMPLATE_EXTENSION,
+        )
 
-REMOVE_SUCCESS_URL = getattr(
-    settings,
-    "ALLAUTH_2FA_REMOVE_SUCCESS_URL",
-    "two-factor-setup",
-)
+    @property
+    def ALWAYS_REVEAL_BACKUP_TOKENS(self) -> bool:
+        return bool(getattr(settings, "ALLAUTH_2FA_ALWAYS_REVEAL_BACKUP_TOKENS", True))
 
-SETUP_SUCCESS_URL = getattr(
-    settings,
-    "ALLAUTH_2FA_SETUP_SUCCESS_URL",
-    "two-factor-backup-tokens",
-)
+    @property
+    def REMOVE_SUCCESS_URL(self) -> str:
+        return getattr(
+            settings,
+            "ALLAUTH_2FA_REMOVE_SUCCESS_URL",
+            "two-factor-setup",
+        )
 
-FORMS = getattr(settings, "ALLAUTH_2FA_FORMS", {})
+    @property
+    def SETUP_SUCCESS_URL(self) -> str:
+        return getattr(
+            settings,
+            "ALLAUTH_2FA_SETUP_SUCCESS_URL",
+            "two-factor-backup-tokens",
+        )
 
-REQUIRE_OTP_ON_DEVICE_REMOVAL = getattr(
-    settings,
-    "ALLAUTH_2FA_REQUIRE_OTP_ON_DEVICE_REMOVAL",
-    True,
-)
+    @property
+    def FORMS(self) -> dict:
+        return getattr(settings, "ALLAUTH_2FA_FORMS", {})
+
+    @property
+    def REQUIRE_OTP_ON_DEVICE_REMOVAL(self) -> bool:
+        return getattr(
+            settings,
+            "ALLAUTH_2FA_REQUIRE_OTP_ON_DEVICE_REMOVAL",
+            True,
+        )
+
+
+_app_settings = _AppSettings()
+
+
+def __getattr__(name: str):
+    # See https://peps.python.org/pep-0562/ :)
+    return getattr(_app_settings, name)
