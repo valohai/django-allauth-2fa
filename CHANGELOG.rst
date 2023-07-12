@@ -6,6 +6,12 @@ Changelog
 0.12.0 - Unreleased
 ===================
 
+Possibly breaking changes
+-------------------------
+
+* You can't write to `allauth_2fa.app_settings` variables anymore;
+  instead modify the underlying `django.conf.settings` settings.
+
 New features
 ------------
 * Add flag to make the required entry of an otp code for device removal optional (#169)

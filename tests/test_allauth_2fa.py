@@ -19,7 +19,6 @@ from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
 
-from allauth_2fa import app_settings
 from allauth_2fa import views
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
@@ -221,8 +220,8 @@ def test_2fa_reset_flow(client, john_with_totp, target_url):
 
 @pytest.mark.parametrize("token_state", ["none", "correct", "static", "incorrect"])
 @pytest.mark.parametrize("require_token", [False, True])
-def test_2fa_removal(client, john_with_totp, token_state, require_token, monkeypatch):
-    monkeypatch.setattr(app_settings, "REQUIRE_OTP_ON_DEVICE_REMOVAL", require_token)
+def test_2fa_removal(client, john_with_totp, token_state, require_token, settings):
+    settings.ALLAUTH_2FA_REQUIRE_OTP_ON_DEVICE_REMOVAL = require_token
     """Removing 2FA should be possible with a correct token
     or without one if REQUIRE_OTP_ON_DEVICE_REMOVAL is False."""
     user, totp_device, static_device = john_with_totp
@@ -365,16 +364,14 @@ def test_require_2fa_middleware(client, john, settings, with_messages):
     ],
 )
 def test_forms_override(
-    monkeypatch: pytest.MonkeyPatch,
+    settings,
     settings_key: str,
     custom_form_cls: type[BaseForm],
     view_cls: type[FormMixin[BaseForm]],
 ) -> None:
     view = view_cls()
     assert view.get_form_class() is view.form_class
-    monkeypatch.setitem(
-        app_settings.FORMS,
-        settings_key,
-        f"{custom_form_cls.__module__}.{custom_form_cls.__qualname__}",
-    )
+    settings.ALLAUTH_2FA_FORMS = {
+        settings_key: f"{custom_form_cls.__module__}.{custom_form_cls.__qualname__}",
+    }
     assert view.get_form_class() is custom_form_cls
