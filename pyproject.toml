@@ -58,6 +58,11 @@ include = [
     "/allauth_2fa",
 ]
 
+[tool.hatch.build.targets.wheel]
+include = [
+    "/allauth_2fa",
+]
+
 [tool.ruff]
 target-version = "py38"
 exclude = [
