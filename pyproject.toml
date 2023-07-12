@@ -57,10 +57,18 @@ path = "allauth_2fa/__init__.py"
 include = [
     "/allauth_2fa",
 ]
+exclude = [
+    "/allauth_2fa/ruff.toml",
+    "/allauth_2fa/py.typed",
+]
 
 [tool.hatch.build.targets.wheel]
 include = [
     "/allauth_2fa",
+]
+exclude = [
+    "/allauth_2fa/ruff.toml",
+    "/allauth_2fa/py.typed",
 ]
 
 [tool.ruff]
