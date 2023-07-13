@@ -57,12 +57,14 @@ path = "allauth_2fa/__init__.py"
 include = [
     "/allauth_2fa/**/*.py",
     "/allauth_2fa/**/*.html",
+    "/allauth_2fa/py.typed",
 ]
 
 [tool.hatch.build.targets.wheel]
 include = [
     "/allauth_2fa/**/*.py",
     "/allauth_2fa/**/*.html",
+    "/allauth_2fa/py.typed",
 ]
 
 [tool.ruff]
