@@ -16,6 +16,11 @@ New features
 ------------
 * Add flag to make the required entry of an otp code for device removal optional (#169)
 
+0.11.1 - July 13, 2023
+======================
+
+Patch release to address a packaging issue where templates weren't included (#176, #177).
+
 0.11.0 - July 4, 2023
 =====================
 
