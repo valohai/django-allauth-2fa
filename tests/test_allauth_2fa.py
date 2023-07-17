@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 import pytest
 from allauth.account.signals import user_logged_in
+from allauth.account.views import PasswordResetFromKeyView
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -19,6 +20,7 @@ from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
 
+from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa import views
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
@@ -375,3 +377,25 @@ def test_forms_override(
         settings_key: f"{custom_form_cls.__module__}.{custom_form_cls.__qualname__}",
     }
     assert view.get_form_class() is custom_form_cls
+
+
+@pytest.mark.parametrize(
+    ("view_cls"),
+    [
+        (PasswordResetFromKeyView),
+    ]
+)
+def test_view_missing_attribute(
+    request,
+    view_cls,
+) -> None:
+    view = view_cls()
+
+    # Ensure we're testing a view that's missing the attribute.
+    with pytest.raises(AttributeError):
+        getattr(view, "redirect_field_name")
+        
+    adapter = OTPAdapter()
+
+    # Ensure the function doesn't fail when the attribute is missing.
+    assert adapter.get_2fa_authenticate_url(request) is not None
