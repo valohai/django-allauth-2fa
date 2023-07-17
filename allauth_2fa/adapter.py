@@ -51,7 +51,7 @@ class OTPAdapter(DefaultAccountAdapter):
             view.request = request
             success_url = view.get_success_url()
             query_params = request.GET.copy()
-            if success_url:
+            if success_url and hasattr(view, "redirect_field_name"):
                 query_params[view.redirect_field_name] = success_url
             if query_params:
                 redirect_url += f"?{urlencode(query_params)}"
