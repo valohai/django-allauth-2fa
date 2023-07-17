@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from urllib.parse import urlencode
-
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.models import SocialLogin
@@ -11,6 +9,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
+from allauth_2fa.utils import get_next_query_string
 from allauth_2fa.utils import user_has_valid_totp_device
 
 
@@ -45,16 +44,9 @@ class OTPAdapter(DefaultAccountAdapter):
         redirect_url = reverse("two-factor-authenticate")
 
         # Add "next" parameter to the URL if possible.
-        # If the view function smells like a class-based view, we can interrogate it.
-        if getattr(request.resolver_match.func, "view_class", None):
-            view = request.resolver_match.func.view_class()
-            view.request = request
-            success_url = view.get_success_url()
-            query_params = request.GET.copy()
-            if success_url:
-                query_params[view.redirect_field_name] = success_url
-            if query_params:
-                redirect_url += f"?{urlencode(query_params)}"
+        query_string = get_next_query_string(request)
+        if query_string:
+            redirect_url += query_string
 
         return redirect_url
 
