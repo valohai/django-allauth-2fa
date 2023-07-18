@@ -392,8 +392,7 @@ def test_view_missing_attribute(
     view = view_cls()
 
     # Ensure we're testing a view that's missing the attribute.
-    with pytest.raises(AttributeError):
-        view.redirect_field_name
+    assert hasattr(view, "get_redirect_field_name") is False
 
     adapter = OTPAdapter()
 
