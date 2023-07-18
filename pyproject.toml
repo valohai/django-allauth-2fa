@@ -50,6 +50,20 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/valohai/django-allauth-2fa"
 
+[project.optional-dependencies]
+test = [
+    "pytest-cov==4.1.0",
+    "pytest-django==4.5.2",
+]
+docs = [
+    "Sphinx==1.6.5",
+    "sphinx-autobuild==0.7.1",   # To auto-build docs as they're edited.
+    "sphinx-rtd-theme==0.2.4",   # The Read the Docs theme for Sphinx.
+]
+
+[tool.hatch.envs.default]
+features = ["test"]
+
 [tool.hatch.version]
 path = "allauth_2fa/__init__.py"
 

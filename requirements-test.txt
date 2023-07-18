@@ -1,2 +1,0 @@
-pytest-cov
-pytest-django~=4.5.2
