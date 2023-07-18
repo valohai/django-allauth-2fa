@@ -46,8 +46,9 @@ class OTPAdapter(DefaultAccountAdapter):
 
         # Add "next" parameter to the URL if possible.
         # If the view function smells like a class-based view, we can interrogate it.
-        if getattr(request, "resolver_match", None) and \
-            getattr(request.resolver_match.func, "view_class", None):
+        if getattr(request, "resolver_match", None) and getattr(
+            request.resolver_match.func, "view_class", None
+        ):
             view = request.resolver_match.func.view_class()
             view.request = request
             success_url = view.get_success_url()

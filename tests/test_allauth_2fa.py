@@ -20,8 +20,8 @@ from django_otp.plugins.otp_static.models import StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from pytest_django.asserts import assertRedirects
 
-from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa import views
+from allauth_2fa.adapter import OTPAdapter
 from allauth_2fa.middleware import BaseRequire2FAMiddleware
 
 from . import forms as forms_overrides
@@ -383,7 +383,7 @@ def test_forms_override(
     ("view_cls"),
     [
         (PasswordResetFromKeyView),
-    ]
+    ],
 )
 def test_view_missing_attribute(
     request,
@@ -393,8 +393,8 @@ def test_view_missing_attribute(
 
     # Ensure we're testing a view that's missing the attribute.
     with pytest.raises(AttributeError):
-        getattr(view, "redirect_field_name")
-        
+        view.redirect_field_name
+
     adapter = OTPAdapter()
 
     # Ensure the function doesn't fail when the attribute is missing.
