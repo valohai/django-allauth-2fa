@@ -73,6 +73,8 @@ MIDDLEWARE = (
     "django_otp.middleware.OTPMiddleware",
     # Reset login flow middleware.
     "allauth_2fa.middleware.AllauthTwoFactorMiddleware",
+    # Allauth account middleware.
+    "allauth.account.middleware.AccountMiddleware",
 )
 
 if django.VERSION < (2,):
