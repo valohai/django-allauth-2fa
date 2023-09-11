@@ -73,6 +73,8 @@ MIDDLEWARE = (
     "django_otp.middleware.OTPMiddleware",
     # Reset login flow middleware.
     "allauth_2fa.middleware.AllauthTwoFactorMiddleware",
+    # Allauth account middleware.
+    "allauth.account.middleware.AccountMiddleware",
 )
 
 if django.VERSION < (2,):
@@ -83,3 +85,5 @@ PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
 
 # Enable two-factor auth.
 ACCOUNT_ADAPTER = "allauth_2fa.adapter.OTPAdapter"
+
+STATIC_URL = "/static/"

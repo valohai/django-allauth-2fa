@@ -89,7 +89,7 @@ Setup you virtual environment with hatch:
 Running tests
 '''''''''''''
 
-Tests can be run using [pytest](https://docs.pytest.org/en/6.2.x/).
+Tests can be run using `pytest <https://docs.pytest.org/en/6.2.x/>`_
 
 .. code-block:: bash
 
