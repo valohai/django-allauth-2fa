@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from allauth_2fa.utils import user_has_valid_totp_device
+from allauth_2fa.utils import user_has_valid_totp_device, get_next_query_string
 
 
 class OTPAdapter(DefaultAccountAdapter):
@@ -46,11 +46,7 @@ class OTPAdapter(DefaultAccountAdapter):
 
         # Add "next" parameter to the URL if possible.
         # If the view function smells like a class-based view, we can interrogate it.
-        if getattr(request, "resolver_match", None) and getattr(
-            request.resolver_match.func,
-            "view_class",
-            None,
-        ):
+        if get_next_query_string(request):
             view = request.resolver_match.func.view_class()
             view.request = request
             success_url = view.get_success_url()
