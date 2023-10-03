@@ -326,7 +326,6 @@ def test_backup_tokens_number(client, john_with_totp):
     """Tests that the configured number of tokens is sent."""
     user, totp_device, static_device = john_with_totp
     login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
-
     do_totp_authentication(
         client,
         totp_device=totp_device,
