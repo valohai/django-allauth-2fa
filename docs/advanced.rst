@@ -18,8 +18,8 @@ For example, to require a user to be a superuser:
 
     class RequireSuperuser2FAMiddleware(BaseRequire2FAMiddleware):
         def require_2fa(self, request):
-            # Superusers are require to have 2FA.
+            # Superusers are required to have 2FA.
             return request.user.is_superuser
 
-If the user doesn't have 2FA enabled they will be redirected to the 2FA
+If the user doesn't have 2FA enabled, then they will be redirected to the 2FA
 configuration page and will not be allowed to access (most) other pages.
