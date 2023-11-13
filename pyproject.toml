@@ -41,7 +41,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "django-allauth>=0.53.0",
+    # Pinned to due to backward-incompatible template changes in 0.58.0.
+    "django-allauth>=0.53.0,<0.58.0",
     "django-otp>=1.2.0",
     "django>=4.1",
     "qrcode>=5.3",
