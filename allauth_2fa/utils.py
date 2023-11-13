@@ -6,9 +6,9 @@ from urllib.parse import quote
 from urllib.parse import urlencode
 
 import qrcode
+from django.http import HttpRequest
 from django_otp.models import Device
 from qrcode.image.svg import SvgPathImage
-from django.http import HttpRequest
 
 
 def get_device_base32_secret(device: Device) -> str:
@@ -42,7 +42,7 @@ def get_next_query_string(request: HttpRequest) -> str | None:
     """
     Get the query string (including the prefix `?`) to
     redirect to after a successful POST.
-    
+
     If a query string can't be determined, returns None.
     """
     # If the view function smells like a class-based view,

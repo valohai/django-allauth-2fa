@@ -11,7 +11,8 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from allauth_2fa.utils import user_has_valid_totp_device, get_next_query_string
+from allauth_2fa.utils import get_next_query_string
+from allauth_2fa.utils import user_has_valid_totp_device
 
 
 class OTPAdapter(DefaultAccountAdapter):
