@@ -180,7 +180,7 @@ class TwoFactorBackupTokens(ValidTOTPDeviceRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         static_device, _ = request.user.staticdevice_set.get_or_create(name="backup")
         static_device.token_set.all().delete()
-        for _ in range(3):
+        for _ in range(app_settings.BACKUP_TOKENS_NUMBER):
             static_device.token_set.create(token=StaticToken.random_token())
         self.reveal_tokens = True
         return self.get(request, *args, **kwargs)

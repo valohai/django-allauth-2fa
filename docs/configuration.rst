@@ -41,3 +41,10 @@ Possible keys (and default values):
 * ``authenticate``: :class:`allauth_2fa.forms.TOTPAuthenticateForm`
 * ``setup``: :class:`allauth_2fa.forms.TOTPDeviceForm`
 * ``remove``: :class:`allauth_2fa.forms.TOTPDeviceRemoveForm`
+
+``ALLAUTH_2FA_BACKUP_TOKENS_NUMBER``
+----------------------------------
+
+Sets the number of generated backup tokens.
+
+Defaults to ``3``.

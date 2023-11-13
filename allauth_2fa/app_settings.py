@@ -45,6 +45,14 @@ class _AppSettings:
             True,
         )
 
+    @property
+    def BACKUP_TOKENS_NUMBER(self) -> int:
+        return getattr(
+            settings,
+            "ALLAUTH_2FA_BACKUP_TOKENS_NUMBER",
+            3,
+        )
+
 
 _app_settings = _AppSettings()
 

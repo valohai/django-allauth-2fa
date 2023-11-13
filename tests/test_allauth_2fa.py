@@ -30,6 +30,7 @@ ADAPTER_CLASSES = [
 ]
 
 TWO_FACTOR_AUTH_URL = reverse_lazy("two-factor-authenticate")
+TWO_FACTOR_BACKUP_TOKENS_URL = reverse_lazy("two-factor-backup-tokens")
 TWO_FACTOR_SETUP_URL = reverse_lazy("two-factor-setup")
 LOGIN_URL = reverse_lazy("account_login")
 JOHN_CREDENTIALS = {"login": "john", "password": "doe"}
@@ -319,6 +320,23 @@ def test_not_configured_redirect(client, john):
     for url_name in ["two-factor-backup-tokens", "two-factor-remove"]:
         resp = client.get(reverse(url_name))
         assertRedirects(resp, TWO_FACTOR_SETUP_URL, fetch_redirect_response=False)
+
+
+def test_backup_tokens_number(client, john_with_totp):
+    """Tests that the configured number of tokens is sent."""
+    user, totp_device, static_device = john_with_totp
+    login(client, expected_redirect_url=TWO_FACTOR_AUTH_URL)
+    do_totp_authentication(
+        client,
+        totp_device=totp_device,
+        expected_redirect_url=settings.LOGIN_REDIRECT_URL,
+    )
+    resp = client.post(TWO_FACTOR_BACKUP_TOKENS_URL)
+    assert len(resp.context_data["backup_tokens"]) == 3
+
+    with override_settings(ALLAUTH_2FA_BACKUP_TOKENS_NUMBER=10):
+        resp = client.post(TWO_FACTOR_BACKUP_TOKENS_URL)
+        assert len(resp.context_data["backup_tokens"]) == 10
 
 
 class Require2FA(BaseRequire2FAMiddleware):
