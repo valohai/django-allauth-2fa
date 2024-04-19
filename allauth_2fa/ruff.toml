@@ -1,6 +1,6 @@
 extend = "../pyproject.toml"
 
-[isort]
+[lint.isort]
 required-imports = [
     "from __future__ import annotations",
 ]
