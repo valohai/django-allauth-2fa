@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from allauth.account.adapter import DefaultAccountAdapter
-from allauth.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.models import SocialLogin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest
@@ -11,6 +10,11 @@ from django.urls import reverse
 
 from allauth_2fa.utils import get_next_query_string
 from allauth_2fa.utils import user_has_valid_totp_device
+
+try:
+    from allauth.core.exceptions import ImmediateHttpResponse
+except ImportError:
+    from allauth.exceptions import ImmediateHttpResponse
 
 
 class OTPAdapter(DefaultAccountAdapter):
