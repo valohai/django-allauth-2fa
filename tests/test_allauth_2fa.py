@@ -9,6 +9,7 @@ from allauth.account.views import PasswordResetFromKeyView
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
+from django.core.management import call_command
 from django.forms import BaseForm
 from django.test import override_settings
 from django.urls import reverse
@@ -48,6 +49,13 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("adapter", ADAPTER_CLASSES, indirect=True)
 
 
+def create_totp_and_static(user: AbstractUser) -> tuple[TOTPDevice, StaticDevice]:
+    totp_model = user.totpdevice_set.create()
+    static_model = user.staticdevice_set.create()
+    static_model.token_set.create(token=StaticToken.random_token())
+    return totp_model, static_model
+
+
 @pytest.fixture(autouse=True)
 def adapter(request, settings):
     settings.ACCOUNT_ADAPTER = request.param
@@ -65,9 +73,7 @@ def john() -> AbstractUser:
 
 @pytest.fixture()
 def john_with_totp(john: AbstractUser) -> tuple[AbstractUser, TOTPDevice, StaticDevice]:
-    totp_model = john.totpdevice_set.create()
-    static_model = john.staticdevice_set.create()
-    static_model.token_set.create(token=StaticToken.random_token())
+    totp_model, static_model = create_totp_and_static(john)
     return john, totp_model, static_model
 
 
@@ -404,3 +410,15 @@ def test_view_missing_attribute(request, view_cls) -> None:
 
     # Ensure the function doesn't fail when the attribute is missing.
     assert OTPAdapter().get_2fa_authenticate_url(request) is not None
+
+
+def test_migration_management_command():
+    from allauth.mfa.models import Authenticator
+
+    for x in range(10):
+        user = get_user_model().objects.create(username=f"user{x}")
+        create_totp_and_static(user)
+    call_command("allauth_2fa_migrate")
+    auth_qs = Authenticator.objects
+    assert auth_qs.filter(type=Authenticator.Type.RECOVERY_CODES).count() == 10
+    assert auth_qs.filter(type=Authenticator.Type.TOTP).count() == 10
