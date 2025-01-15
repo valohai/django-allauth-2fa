@@ -3,8 +3,23 @@
 Changelog
 #########
 
-0.12.0 - Unreleased
-===================
+0.12.0 - January 2025
+=====================
+
+Note
+----
+
+This may be the last version of django-allauth-2fa under this stewardship;
+allauth contains its own ``allauth.mfa`` package that should be used instead
+for versions of Allauth >= 0.58.0.  The dependency range for ``allauth`` in this
+version has been updated accordingly; this release will conflict with newer versions
+of ``allauth`` on purpose.
+
+See https://github.com/valohai/django-allauth-2fa/issues/189 for discussion.
+
+You can use the experimental ``allauth_2fa_migrate`` management command to create
+``allauth.mfa`` Authenticator objects from your ``allauth_2fa`` data before switching
+your production environment over to ``allauth.mfa``.
 
 Possibly breaking changes
 -------------------------
@@ -12,9 +27,12 @@ Possibly breaking changes
 * You can't write to `allauth_2fa.app_settings` variables anymore;
   instead modify the underlying `django.conf.settings` settings.
 
-New features
-------------
-* Add flag to make the required entry of an otp code for device removal optional (#169)
+New features and fixes
+----------------------
+
+* Add flag to make the required entry of an OTP code for device removal optional (#169)
+* Add setting to allow generating a different number of backup tokens (#192)
+* Potential bugfix for ``redirect_field_name`` AttributeError (#196)
 
 0.11.1 - July 13, 2023
 ======================
