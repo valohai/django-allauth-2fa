@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from allauth.account.adapter import DefaultAccountAdapter
-from allauth.exceptions import ImmediateHttpResponse
+from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.models import SocialLogin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest
