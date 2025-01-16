@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     # Enable allauth.
     "allauth",
     "allauth.account",
+    "allauth.mfa",  # For testing the migration.
     # Required to render the default template for 'account_login'.
     "allauth.socialaccount",
     # Configure the django-otp package.
