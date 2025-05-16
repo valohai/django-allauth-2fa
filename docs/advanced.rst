@@ -10,7 +10,7 @@ or being in a particular group). This is implemented by subclassing the
 ``require_2fa`` method on it. This middleware needs to be added to your
 ``MIDDLEWARE_CLASSES`` setting.
 
-For example, to require a user to be a superuser:
+For example, to require superusers to use 2FA:
 
 .. code-block:: python
 
