@@ -1,5 +1,3 @@
-import django
-
 DEBUG = True
 SECRET_KEY = "not_empty"
 SITE_ID = 1
@@ -78,8 +76,6 @@ MIDDLEWARE = (
     "allauth.account.middleware.AccountMiddleware",
 )
 
-if django.VERSION < (2,):
-    MIDDLEWARE += ("django.contrib.auth.middleware.SessionAuthenticationMiddleware",)
 
 AUTHENTICATION_BACKENDS = ("django.contrib.auth.backends.ModelBackend",)
 PASSWORD_HASHERS = ("django.contrib.auth.hashers.MD5PasswordHasher",)
