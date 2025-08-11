@@ -12,29 +12,28 @@ jobs:
   Lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - uses: pre-commit/action@v3.0.0
+      - uses: pre-commit/action@v3.0.1
   Test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
           - python-version: "3.8"
           - python-version: "3.9"
           - python-version: "3.10"
-          - python-version: "3.10"
-            djangomain: "djangomain"
           - python-version: "3.11"
-          - python-version: "3.11"
+          - python-version: "3.12"
+          - python-version: "3.12"
             djangomain: "djangomain"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: "Set up Python ${{ matrix.python-version }}"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "${{ matrix.python-version }}"
           cache: pip
@@ -56,14 +55,14 @@ jobs:
       - run: |
           mkdir /tmp/coverage
           find .tox -type f -name 'coverage*xml' -exec mv '{}' /tmp/coverage ';'
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v5
         with:
           directory: /tmp/coverage
   Build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
@@ -72,7 +71,7 @@ jobs:
             **/setup.cfg
       - run: pip install -U build
       - run: python -m build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist/
@@ -88,7 +87,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v5
         with:
           name: dist
           path: dist/
